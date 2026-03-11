@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -16,48 +16,38 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+    }
 
-        EditText username = findViewById(R.id.username);
-        EditText password = findViewById(R.id.password);
-        Button loginButton = findViewById(R.id.loginButton);
-        Button signupButton = findViewById(R.id.signupButton);
+    public void onLogin(View view) {
+        EditText usernameEditText = findViewById(R.id.username);
+        EditText passwordEditText = findViewById(R.id.password);
+        String username = usernameEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String user = username.getText().toString().trim();
-                String pwd = password.getText().toString();
+        // TODO: User Authentication (with Server Database figured out)
+        if (true) {
+            // Save credentials to SharedPreferences (local)
+            SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("username", username);
+            editor.putString("password", password);
+            editor.apply();
 
-                // TODO: User Authentication (with Server Database figured out)
-                if (true) {
-                    // Save credentials to SharedPreferences (local)
-                    SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("username", user);
-                    editor.putString("password", pwd);
-                    editor.apply();
+            Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
 
-                    Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+            // Go to MainActivity
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish(); // Close LoginActivity so user can't go back
 
-                    // Go to MainActivity
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish(); // Close LoginActivity so user can't go back
+        } else {
+            Toast.makeText(LoginActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-                } else {
-                    Toast.makeText(LoginActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Go to MainActivity
-                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-                startActivity(intent);
-            }
-        });
-
+    public void onSignUp(View view) {
+        // Go to MainActivity
+        Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+        startActivity(intent);
     }
 }

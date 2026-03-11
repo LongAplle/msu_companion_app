@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,26 +30,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TextView greetingText = findViewById(R.id.greetingText);
-        Button logoutButton = findViewById(R.id.logoutButton);
-
         String greetingMsg = getString(R.string.greetingText, username);
         greetingText.setText(greetingMsg);
+    }
 
-        // Logout button click listener
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Clear stored credentials
-                SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-                prefs.edit().clear().apply();
+    public void onLogOut(View view) {
+        // Clear stored credentials
+        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
 
-                Toast.makeText(MainActivity.this, "Logged out", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Logged out", Toast.LENGTH_SHORT).show();
 
-                // Go back to LoginActivity
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+        // Go back to LoginActivity
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
