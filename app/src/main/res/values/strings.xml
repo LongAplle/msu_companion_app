@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">MSU Companion</string>
-    <string name="phoneNumberHint">Phone Number</string>
+    <string name="usernameHint">Username</string>
     <string name="passwordHint">Password</string>
     <string name="loginText">Login</string>
+    <string name="greetingText">Hello, %1$s!</string>
+    <string name="signupText">Sign Up</string>
+    <string name="passwordRetypeHint">Retype Password</string>
+    <string name="LogoutText">Logout</string>
+    <string name="signupQuery">Not yet registered?</string>
 </resources>

@@ -11,25 +11,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class LoginActivity extends AppCompatActivity {
+public class SignupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_signup);
 
         EditText username = findViewById(R.id.username);
         EditText password = findViewById(R.id.password);
-        Button loginButton = findViewById(R.id.loginButton);
+        EditText passwordRetype = findViewById(R.id.passwordRetype);
         Button signupButton = findViewById(R.id.signupButton);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String user = username.getText().toString().trim();
                 String pwd = password.getText().toString();
+                String pwd2 = passwordRetype.getText().toString();
 
-                // TODO: User Authentication (with Server Database figured out)
-                if (true) {
+                if (pwd.equals(pwd2) && !user.isEmpty()) {
+                    //TODO: Add password requirements
+                    //TODO: Add User Info to Server Database (including checking if user already exists)
+
                     // Save credentials to SharedPreferences (local)
                     SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
@@ -37,27 +40,19 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString("password", pwd);
                     editor.apply();
 
-                    Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignupActivity.this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
 
                     // Go to MainActivity
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    Intent intent = new Intent(SignupActivity.this, MainActivity.class);
                     startActivity(intent);
-                    finish(); // Close LoginActivity so user can't go back
+                    finish(); // Close SignupActivity so user can't go back
 
                 } else {
-                    Toast.makeText(LoginActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
+                    password.setText("");
+                    passwordRetype.setText("");
+                    Toast.makeText(SignupActivity.this, "Signup Failed!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Go to MainActivity
-                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-                startActivity(intent);
-            }
-        });
-
     }
 }
