@@ -12,10 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 public class MainActivity extends AppCompatActivity {
+    private SharedPreferences prefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+
+        prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         String username = prefs.getString("username", null);
 
         if (username == null) {
@@ -34,7 +37,17 @@ public class MainActivity extends AppCompatActivity {
         greetingText.setText(greetingMsg);
     }
 
+    public void onViewContacts(View view) {
+        Intent intent = new Intent(MainActivity.this, ContactListActivity.class);
+        startActivity(intent);
+    }
+
     public void onLogOut(View view) {
+        // Clear Room data
+        int currUserId = prefs.getInt("userId", 0);
+        new Thread(() -> AppDatabase.getInstance(this).contactDao()
+                .deleteContactsForUser(String.valueOf(currUserId))).start();
+
         // Clear stored credentials
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         prefs.edit().clear().apply();

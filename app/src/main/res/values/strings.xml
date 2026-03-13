@@ -8,4 +8,11 @@
     <string name="passwordRetypeHint">Retype Password</string>
     <string name="LogoutText">Logout</string>
     <string name="signupQuery">Not yet registered?</string>
+    <string name="addContact">Add New Contact</string>
+    <string name="addContactText">Add Contact</string>
+    <string name="contactNameHint">Name</string>
+    <string name="contactPhoneHint">Phone Number</string>
+    <string name="saveText">Save</string>
+    <string name="contactViewText">View Trusted Contacts</string>
+    <string name="searchContactHint">Search by Name or Phone Number</string>
 </resources>
