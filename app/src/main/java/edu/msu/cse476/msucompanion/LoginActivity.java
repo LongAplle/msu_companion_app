@@ -36,21 +36,21 @@ public class LoginActivity extends AppCompatActivity {
             editor.putString("password", password);
             editor.apply();
 
-            Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
 
             // Go to MainActivity
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish(); // Close LoginActivity so user can't go back
 
         } else {
-            Toast.makeText(LoginActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Login Failed!", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void onSignUp(View view) {
         // Go to MainActivity
-        Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+        Intent intent = new Intent(this, SignupActivity.class);
         startActivity(intent);
     }
 }

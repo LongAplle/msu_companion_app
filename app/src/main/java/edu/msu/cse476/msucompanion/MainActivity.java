@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onViewContacts(View view) {
-        Intent intent = new Intent(MainActivity.this, ContactListActivity.class);
+        Intent intent = new Intent(this, ContactListActivity.class);
         startActivity(intent);
     }
 
@@ -52,10 +52,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
 
-        Toast.makeText(MainActivity.this, "Logged out", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
 
         // Go back to LoginActivity
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
     }

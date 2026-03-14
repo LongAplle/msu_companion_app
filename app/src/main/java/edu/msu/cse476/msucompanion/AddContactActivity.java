@@ -35,7 +35,7 @@ public class AddContactActivity extends AppCompatActivity {
         String name = editName.getText().toString().trim();
         String phone = editPhone.getText().toString().trim();
         if (name.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(AddContactActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 

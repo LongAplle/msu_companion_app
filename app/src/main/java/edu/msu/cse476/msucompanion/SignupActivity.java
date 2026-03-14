@@ -39,17 +39,17 @@ public class SignupActivity extends AppCompatActivity {
             editor.putString("password", password);
             editor.apply();
 
-            Toast.makeText(SignupActivity.this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
 
             // Go to MainActivity
-            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish(); // Close SignupActivity so user can't go back
 
         } else {
             passwordEditText.setText("");
             passwordRetypeEditText.setText("");
-            Toast.makeText(SignupActivity.this, "Signup Failed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Signup Failed!", Toast.LENGTH_SHORT).show();
         }
     }
 }
