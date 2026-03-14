@@ -15,4 +15,6 @@
     <string name="saveText">Save</string>
     <string name="contactViewText">View Trusted Contacts</string>
     <string name="searchContactHint">Search by Name or Phone Number</string>
+    <string name="editContactText">Edit Contact</string>
+    <string name="deleteText">Delete</string>
 </resources>

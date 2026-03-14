@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MSUCompanion">
         <activity
+            android:name=".EditOrDeleteContactActivity"
+            android:exported="false" />
+        <activity
             android:name=".AddContactActivity"
             android:exported="false" />
         <activity

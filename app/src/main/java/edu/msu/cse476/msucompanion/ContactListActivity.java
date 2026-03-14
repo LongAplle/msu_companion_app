@@ -8,7 +8,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -70,7 +69,7 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     public void onAddContact(View view) {
-        Intent intent = new Intent(ContactListActivity.this, AddContactActivity.class);
+        Intent intent = new Intent(this, AddContactActivity.class);
         startActivity(intent);
     }
 
@@ -78,8 +77,11 @@ public class ContactListActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ContactAdapter(new ArrayList<>(), contact -> {
-            Toast.makeText(ContactListActivity.this, "Clicked: " + contact.getName(), Toast.LENGTH_SHORT).show();
-            //TODO: Add Edit Contact functionality
+            Intent intent = new Intent(ContactListActivity.this, EditOrDeleteContactActivity.class);
+            intent.putExtra("contact_id", contact.getId());
+            intent.putExtra("contact_name", contact.getName());
+            intent.putExtra("contact_phone", contact.getPhoneNumber());
+            startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
     }
@@ -104,6 +106,4 @@ public class ContactListActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
     }
-
-    // TODO: Implement Edit/Delete Contact functionalities
 }

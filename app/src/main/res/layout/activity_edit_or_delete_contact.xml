@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    tools:context=".AddContactActivity">
+    tools:context=".EditOrDeleteContactActivity">
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,10 +24,10 @@
             android:padding="24dp">
 
             <TextView
-                android:id="@+id/addContactText"
+                android:id="@+id/EditContactText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/addContactText"
+                android:text="@string/editContactText"
                 android:textAlignment="center"
                 android:textSize="36sp"
                 android:textStyle="bold" />
@@ -67,7 +67,26 @@
                 android:text="@string/saveText"
                 android:textSize="18sp"
                 app:cornerRadius="20dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:layout_marginTop="24dp"
+                android:background="#c0c0c0" />
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="24dp"
+                android:onClick="onDelete"
+                android:text="@string/deleteText"
+                android:textSize="18sp"
+                app:cornerRadius="20dp" />
+
         </LinearLayout>
+
+
     </androidx.cardview.widget.CardView>
 
 </LinearLayout>
