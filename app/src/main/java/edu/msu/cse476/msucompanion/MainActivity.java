@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         String username = prefs.getString("username", null);
+        String fullName = prefs.getString("full_name", null);
 
         if (username == null) {
             // No user logged in → go to LoginActivity
@@ -29,8 +30,9 @@ public class MainActivity extends AppCompatActivity {
         // User is logged in, proceed with normal UI
         setContentView(R.layout.activity_main);
 
+        String displayName = (fullName != null && !fullName.isEmpty()) ? fullName : username;
         TextView greetingText = findViewById(R.id.greetingText);
-        String greetingMsg = getString(R.string.greetingText, username);
+        String greetingMsg = getString(R.string.greetingText, displayName);
         greetingText.setText(greetingMsg);
     }
 
@@ -45,5 +47,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public void onStartSession(View view) {
+        Intent intent = new Intent(MainActivity.this, SessionActivity.class);
+        startActivity(intent);
     }
 }

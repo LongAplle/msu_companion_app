@@ -1,5 +1,6 @@
 package edu.msu.cse476.msucompanion;
 
+import android.graphics.Paint;
 import android.os.Bundle;
 
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class SignupActivity extends AppCompatActivity {
@@ -15,24 +17,37 @@ public class SignupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        TextView goBack = findViewById(R.id.goBackFromSignup);
+        goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+    }
+
+    public void onGoBackToLogin(View view) {
+        Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     public void onSignUp(View view) {
+        EditText fullNameEditText = findViewById(R.id.fullName);
         EditText usernameEditText = findViewById(R.id.username);
         EditText passwordEditText = findViewById(R.id.password);
         EditText passwordRetypeEditText = findViewById(R.id.passwordRetype);
 
+        String fullName = fullNameEditText.getText().toString().trim();
         String username = usernameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
         String password2 = passwordRetypeEditText.getText().toString();
 
-        if (password.equals(password2) && !username.isEmpty()) {
+        if (password.equals(password2) && !username.isEmpty() && !fullName.isEmpty()) {
             //TODO: Add password requirements
             //TODO: Add User Info to Server Database (including checking if user already exists)
 
             // Save credentials to SharedPreferences (local)
             SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("full_name", fullName);
             editor.putString("username", username);
             editor.putString("password", password);
             editor.apply();
