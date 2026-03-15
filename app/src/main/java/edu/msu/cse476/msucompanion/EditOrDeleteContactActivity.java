@@ -65,6 +65,8 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(this, "Contact not found", Toast.LENGTH_SHORT).show());
             }
         }).start();
+
+        // TODO: Update Contact on Server Database
     }
 
     public void onDelete(View view) {
@@ -78,5 +80,7 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                 finish();
             });
         }).start();
+
+        // TODO: Delete Contact on Server Database
     }
 }
