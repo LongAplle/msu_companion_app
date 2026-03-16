@@ -29,4 +29,18 @@
         android:onClick="onLogOut"
         android:text="@string/LogoutText" />
 
+    <!-- TEMPORARY GPS TEST BUTTON -->
+    <Button
+        android:id="@+id/testGpsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Test GPS Tracking" />
+
+    <Button
+        android:id="@+id/startWalkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Safe Walk"/>
+
 </LinearLayout>
