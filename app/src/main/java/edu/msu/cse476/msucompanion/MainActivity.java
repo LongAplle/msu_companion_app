@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,59 +44,8 @@ public class MainActivity extends AppCompatActivity {
         String greetingMsg = getString(R.string.greetingText, displayName);
         greetingText.setText(greetingMsg);
 
-
-        // GPS button (added)
-        Button testGpsButton = findViewById(R.id.testGpsButton);
-
-        // Start Walk button (added)
-        Button startWalkButton = findViewById(R.id.startWalkButton);
-
         // Initialize GPS helper
         locationHelper = new LocationHelper(this);
-
-        // GPS TEST BUTTON LISTENER (added)
-        testGpsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (!locationHelper.hasLocationPermission()) {
-                    locationHelper.requestLocationPermission(MainActivity.this);
-                    return;
-                }
-
-                locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
-
-                    @Override
-                    public void onLocationUpdated(Location location) {
-
-                        double lat = location.getLatitude();
-                        double lng = location.getLongitude();
-
-                        greetingText.setText(
-                                "Hello, " + username + "!\n\n" +
-                                        "Current Location:\n" +
-                                        "Lat: " + lat + "\n" +
-                                        "Lng: " + lng
-                        );
-                    }
-
-                    @Override
-                    public void onLocationError(String message) {
-                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            }
-        });
-
-        // START WALK BUTTON LISTENER (added)
-        startWalkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, DestinationPickerActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     public void onViewContacts(View view) {
@@ -124,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onStartSession(View view) {
-        Intent intent = new Intent(MainActivity.this, SessionActivity.class);
+        Intent intent = new Intent(this, SessionActivity.class);
         startActivity(intent);
     }
 
@@ -160,5 +108,35 @@ public class MainActivity extends AppCompatActivity {
         if (locationHelper != null) {
             locationHelper.stopLocationUpdates();
         }
+    }
+
+    public void onTestGps(View view) {
+        if (!locationHelper.hasLocationPermission()) {
+            locationHelper.requestLocationPermission(this);
+            return;
+        }
+
+        locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
+            @Override
+            public void onLocationUpdated(Location location) {
+                double lat = location.getLatitude();
+                double lng = location.getLongitude();
+                TextView gpsText = findViewById(R.id.gpsText);
+                gpsText.setText("Current Location:\n" +
+                                "Lat: " + lat + "\n" +
+                                "Lng: " + lng
+                );
+            }
+
+            @Override
+            public void onLocationError(String message) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void onStartWalk(View view) {
+        Intent intent = new Intent(this, DestinationPickerActivity.class);
+        startActivity(intent);
     }
 }
