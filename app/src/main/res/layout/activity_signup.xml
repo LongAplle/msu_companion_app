@@ -31,10 +31,23 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/username"
+                android:id="@+id/fullName"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="40dp"
+                android:autofillHints=""
+                android:drawablePadding="8dp"
+                android:hint="@string/fullNameHint"
+                android:inputType="textPersonName"
+                android:padding="8dp"
+                android:textColor="@color/black"
+                android:textColorHighlight="@color/cardview_dark_background" />
+
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
                 android:autofillHints=""
                 android:drawablePadding="8dp"
                 android:hint="@string/usernameHint"
@@ -77,7 +90,22 @@
                 android:onClick="onSignUp"
                 android:text="@string/signupText"
                 android:textSize="18sp"
-                app:cornerRadius="20dp" />
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/msu_green"/>
+
+            <TextView
+                android:id="@+id/goBackFromSignup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp"
+                android:onClick="onGoBackToLogin"
+                android:text="@string/GoBack"
+                android:textSize="14sp" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

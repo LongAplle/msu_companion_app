@@ -8,7 +8,18 @@
     android:orientation="vertical"
     android:gravity="center"
     tools:context=".LoginActivity">
+
+    <ImageView
+        android:id="@+id/loginLogo"
+        android:layout_width="357dp"
+        android:layout_height="124dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="MSU Companion logo"
+        android:src="@drawable/msucompanionlogo" />
+
     <androidx.cardview.widget.CardView
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
@@ -64,7 +75,8 @@
                 android:onClick="onLogin"
                 android:text="@string/loginText"
                 android:textSize="18sp"
-                app:cornerRadius="20dp" />
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/msu_green"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -83,6 +95,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onSignUp"
-        android:text="@string/signupText" />
+        android:text="@string/signupText"
+        android:backgroundTint="@color/msu_green"/>
 
 </LinearLayout>

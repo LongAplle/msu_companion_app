@@ -10,6 +10,14 @@
     android:gravity="center"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/spartanHeadImage"
+        android:layout_width="326dp"
+        android:layout_height="257dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/spartan_head_logo"
+        android:src="@drawable/spartanhead" />
+
     <TextView
         android:id="@+id/greetingText"
         android:layout_width="wrap_content"
@@ -31,11 +39,58 @@
 
 
     <Button
+        android:id="@+id/startSessionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/createSession"
+        android:onClick="onStartSession"
+        android:backgroundTint="@color/msu_green"/>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/pastSessionsCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/pastSessionsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pastSessions"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/pastSessionsPlaceholder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/TempDiscription"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <Button
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_margin="30dp"
         android:onClick="onLogOut"
-        android:text="@string/LogoutText" />
+        android:text="@string/LogoutText"
+        android:backgroundTint="@color/msu_green"/>
 
 </LinearLayout>
