@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onSignUp(View view) {
-        // Go to MainActivity
+        // Go to SignupActivity
         Intent intent = new Intent(this, SignupActivity.class);
         startActivity(intent);
     }
