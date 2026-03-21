@@ -26,12 +26,11 @@ import androidx.appcompat.app.AppCompatActivity;
 public class WalkSessionActivity extends AppCompatActivity {
 
     // UI components used to display information to the user
-    private TextView tvDestination;
     private TextView tvCurrentLocation;
     private TextView tvDistance;
     private TextView tvStatus;
-    private Button btnStartWalk;
-    private Button btnStopWalk;
+
+    private Button btnToggleWalk;
 
     // Helper class used to manage GPS/location services
     private LocationHelper locationHelper;
@@ -54,20 +53,15 @@ public class WalkSessionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_walk_session);
 
         // Initialize UI components
-        tvDestination = findViewById(R.id.tvDestination);
+        TextView tvDestination = findViewById(R.id.tvDestination);
+        btnToggleWalk = findViewById(R.id.btnToggleWalk);
         tvCurrentLocation = findViewById(R.id.tvCurrentLocation);
         tvDistance = findViewById(R.id.tvDistance);
         tvStatus = findViewById(R.id.tvStatus);
-        btnStartWalk = findViewById(R.id.btnStartWalk);
-        btnStopWalk = findViewById(R.id.btnStopWalk);
 
         // Initialize GPS helper
         locationHelper = new LocationHelper(this);
 
-        /*
-         * Retrieve the destination data passed from the previous screen
-         * (DestinationPickerActivity).
-         */
         String destinationName = getIntent().getStringExtra("destination_name");
         double destinationLat = getIntent().getDoubleExtra("destination_lat", 0.0);
         double destinationLng = getIntent().getDoubleExtra("destination_lng", 0.0);
@@ -84,12 +78,12 @@ public class WalkSessionActivity extends AppCompatActivity {
         destination = new Destination(destinationName, destinationLat, destinationLng);
 
         // Display the selected destination on screen
-        tvDestination.setText("Destination: " + destination.getName());
-        tvStatus.setText("Status: Waiting");
+        tvDestination.setText(getString(R.string.tvDestinationText, destination.getName()));
+        tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, "None"));
+        tvDistance.setText(getString(R.string.tvDistanceText, Float.NaN));
+        tvStatus.setText(getString(R.string.tvStatusText, "Waiting"));
 
-        // Button listeners for starting and stopping the walk session
-        btnStartWalk.setOnClickListener(v -> startWalkSession());
-        btnStopWalk.setOnClickListener(v -> stopWalkSession());
+        btnToggleWalk.setOnClickListener(v -> toggleStartStop());
     }
 
     /*
@@ -108,7 +102,7 @@ public class WalkSessionActivity extends AppCompatActivity {
 
         arrivalAlreadyHandled = false;
         walkSessionActive = true;
-        tvStatus.setText("Status: Walk session active");
+        tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
 
         /*
          * Begin receiving GPS location updates through LocationHelper.
@@ -124,7 +118,7 @@ public class WalkSessionActivity extends AppCompatActivity {
             @Override
             public void onLocationError(String message) {
                 Toast.makeText(WalkSessionActivity.this, message, Toast.LENGTH_SHORT).show();
-                tvStatus.setText("Status: Error - " + message);
+                tvStatus.setText(getString(R.string.tvStatusText,"Error - " + message));
             }
         });
     }
@@ -137,7 +131,7 @@ public class WalkSessionActivity extends AppCompatActivity {
     private void stopWalkSession() {
         walkSessionActive = false;
         locationHelper.stopLocationUpdates();
-        tvStatus.setText("Status: Walk session stopped");
+        tvStatus.setText(getString(R.string.tvStatusText,"Walk session stopped"));
     }
 
     /*
@@ -158,12 +152,8 @@ public class WalkSessionActivity extends AppCompatActivity {
         double lng = location.getLongitude();
 
         // Display current GPS location on screen
-        tvCurrentLocation.setText("Current Location: " + lat + ", " + lng);
+        tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, lat + ", " + lng));
 
-        /*
-         * Calculate the distance between the current location
-         * and the destination using LocationUtility.
-         */
         float distance = LocationUtility.distanceInMeters(
                 lat,
                 lng,
@@ -172,7 +162,7 @@ public class WalkSessionActivity extends AppCompatActivity {
         );
 
         // Display distance to destination
-        tvDistance.setText("Distance to destination: " + String.format("%.2f", distance) + " meters");
+        tvDistance.setText(getString(R.string.tvDistanceText,distance));
 
         /*
          * Send the location update to other parts of the system.
@@ -199,16 +189,12 @@ public class WalkSessionActivity extends AppCompatActivity {
      * Triggers safe arrival notification.
      */
     private void onArrivalDetected() {
+        tvStatus.setText(getString(R.string.tvStatusText,"Arrived safely"));
 
-        tvStatus.setText("Status: Arrived safely");
-
-        // Notify the user
         Toast.makeText(this, "Safe arrival detected!", Toast.LENGTH_LONG).show();
 
-        // Placeholder for sending arrival notification to a trusted contact
         sendArrivalNotification();
 
-        // Stop the walk session
         stopWalkSession();
     }
 
@@ -222,11 +208,7 @@ public class WalkSessionActivity extends AppCompatActivity {
      * - a database
      */
     private void sendLocationUpdateToServerOrContact(double lat, double lng, float distance) {
-
-        // Future implementation example:
-        // 1. Send coordinates to server API
-        // 2. Update trusted contact with live location
-        // 3. Save location history in database
+        // TODO: Implement sending location updates to server or trusted contact
     }
 
     /*
@@ -235,9 +217,17 @@ public class WalkSessionActivity extends AppCompatActivity {
      * Placeholder for notifying a trusted contact that the user has arrived safely.
      */
     private void sendArrivalNotification() {
+        // TODO: Notify trusted contact of safe arrival
+    }
 
-        // Example future implementation:
-        // "User has arrived safely at their destination."
+    private void toggleStartStop(){
+        if (!walkSessionActive) {
+            startWalkSession();
+            btnToggleWalk.setText(getString(R.string.endWalkText));
+        } else {
+            stopWalkSession();
+            btnToggleWalk.setText(getString(R.string.startWalkText));
+        }
     }
 
     /*
@@ -283,7 +273,7 @@ public class WalkSessionActivity extends AppCompatActivity {
                 startWalkSession();
             } else {
                 Toast.makeText(this, "Location permission is required.", Toast.LENGTH_SHORT).show();
-                tvStatus.setText("Status: Permission denied");
+                tvStatus.setText(getString(R.string.tvStatusText,"Permission denied"));
             }
         }
     }
