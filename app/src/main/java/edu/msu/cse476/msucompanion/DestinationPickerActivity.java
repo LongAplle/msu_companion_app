@@ -17,10 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * distance and detect when the user has safely arrived.
  */
 public class DestinationPickerActivity extends AppCompatActivity {
-
-    // Buttons for selecting preset destinations
-    private Button btnLibrary;
-    private Button btnDorm;
+    // TODO: Make choosing Destination via Map or Search Bar instead of Buttons
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +27,8 @@ public class DestinationPickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_destination_picker);
 
         // Connect UI buttons to their XML components
-        btnLibrary = findViewById(R.id.btnLibrary);
-        btnDorm = findViewById(R.id.btnDorm);
+        Button btnLibrary = findViewById(R.id.btnLibrary);
+        Button btnDorm = findViewById(R.id.btnDorm);
 
         /*
          * When the "MSU Library" button is clicked,
