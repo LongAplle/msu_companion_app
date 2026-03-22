@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -96,8 +97,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, "None"));
         tvDistance.setText(getString(R.string.tvDistanceText, Float.NaN));
         tvStatus.setText(getString(R.string.tvStatusText, "Waiting"));
-
-        btnToggleWalk.setOnClickListener(v -> toggleStartStop());
     }
 
     /*
@@ -121,7 +120,6 @@ public class WalkSessionActivity extends AppCompatActivity {
 
         // Start GPS updates
         locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
-
             @Override
             public void onLocationUpdated(Location location) {
                 handleLocationUpdate(location);
@@ -233,7 +231,7 @@ public class WalkSessionActivity extends AppCompatActivity {
     /*
      * Toggle the start/stop button
      */
-    private void toggleStartStop(){
+    public void onToggleStartStop(View view){
         if (!walkSessionActive) {
             startWalkSession();
             btnToggleWalk.setText(getString(R.string.endWalkText));
