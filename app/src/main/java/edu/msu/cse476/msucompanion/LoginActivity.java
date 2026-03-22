@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // TODO: User Authentication with Server Database
         if (true) {
-            // TODO: Get User data from server (userId, full name, username, password + Contacts + Session History)
+            // TODO: Get User data from server (userId, fullName, username, password + Contacts + Session History)
 
             // Save credentials to SharedPreferences (local)
             SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
@@ -35,6 +35,8 @@ public class LoginActivity extends AppCompatActivity {
             editor.putString("username", username);
             editor.putString("password", password);
             editor.apply();
+
+            // TODO: Populate local Contact and Session History
 
             Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
 

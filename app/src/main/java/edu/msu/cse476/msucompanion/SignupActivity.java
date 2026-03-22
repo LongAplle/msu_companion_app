@@ -41,8 +41,9 @@ public class SignupActivity extends AppCompatActivity {
         String password2 = passwordRetypeEditText.getText().toString();
 
         if (password.equals(password2) && !username.isEmpty()) {
-            // TODO: Add User Exist Check and Password Requirement Check
-            // TODO: Add User Data to Server Database (userId, full name, username, password hash)
+            // TODO: Password Requirement Check
+            // TODO: Username Exist Check (using username)
+            // TODO: Add User Data to Server Database (userId, fullName, username, password hash)
 
             // Save credentials to SharedPreferences (local)
             SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);

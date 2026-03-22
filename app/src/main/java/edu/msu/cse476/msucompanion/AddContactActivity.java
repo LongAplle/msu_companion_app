@@ -42,13 +42,15 @@ public class AddContactActivity extends AppCompatActivity {
         // Create new contact
         Contact contact = new Contact(currUserId, name, phone);
         new Thread(() -> {
-            db.contactDao().insert(contact);
+            long rowId = db.contactDao().insert(contact);
+            int contactId = (int) rowId;
+
+            // TODO: Add Contact to Server Database (contactId, currUserId, name, phone)
+
             runOnUiThread(() -> {
                 Toast.makeText(AddContactActivity.this, "Contact saved", Toast.LENGTH_SHORT).show();
                 finish();
             });
         }).start();
-
-        // TODO: Add Contact to Server Database
     }
 }

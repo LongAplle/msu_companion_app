@@ -69,6 +69,9 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                 existing.setName(newName);
                 existing.setPhoneNumber(newPhone);
                 db.contactDao().update(existing);
+
+                // TODO: Update Contact on Server Database (contactId, currUserId, name, phone)
+
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Contact updated", Toast.LENGTH_SHORT).show();
                     finish();
@@ -77,8 +80,6 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(this, "Contact not found", Toast.LENGTH_SHORT).show());
             }
         }).start();
-
-        // TODO: Update Contact on Server Database
     }
 
     public void onDelete(View view) {
