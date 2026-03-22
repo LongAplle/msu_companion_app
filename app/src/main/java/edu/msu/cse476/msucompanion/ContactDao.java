@@ -11,7 +11,7 @@ import java.util.List;
 @Dao
 public interface ContactDao {
     @Insert
-    void insert(Contact contact);
+    long insert(Contact contact);
 
     @Update
     void update(Contact contact);
@@ -23,7 +23,7 @@ public interface ContactDao {
     void deleteContactsForUser(String userId);
 
     @Query("SELECT * FROM contacts WHERE id = :id")
-   Contact getContactById(int id);
+    Contact getContactById(int id);
 
     @Query("SELECT * FROM contacts WHERE userId = :userId")
     List<Contact> getContactsForUser(int userId);
