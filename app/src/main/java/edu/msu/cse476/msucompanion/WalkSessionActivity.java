@@ -1,5 +1,7 @@
 package edu.msu.cse476.msucompanion;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,17 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * WalkSessionActivity
- *
  * This activity manages the user's walking session. It tracks the user's
  * GPS location in real time and compares it with the selected destination.
- *
- * Responsibilities of this class:
- * 1. Start and stop walk sessions
- * 2. Continuously track the user's GPS location
- * 3. Display current location and distance to destination
- * 4. Detect when the user reaches the destination
- * 5. Trigger a safe-arrival event
  */
 public class WalkSessionActivity extends AppCompatActivity {
 
@@ -52,6 +45,9 @@ public class WalkSessionActivity extends AppCompatActivity {
     // Prevents multiple arrival triggers once destination is reached
     private boolean arrivalAlreadyHandled = false;
 
+    // current user ID
+    private int currUserId;
+
 
     // Handler for periodic SMS updates
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -66,6 +62,14 @@ public class WalkSessionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk_session);
+
+        // Get current user
+        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        currUserId = prefs.getInt("userId", 0);
+        if (currUserId == 0) {
+            finish();
+            return;
+        }
 
         // Initialize UI components
         TextView tvDestination = findViewById(R.id.tvDestination);
@@ -110,7 +114,7 @@ public class WalkSessionActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO: Fetch trusted contacts from Room
+        // TODO: Fetch trusted contacts from local database
 
         sendNotification("I'm starting a walk to " + destination.getName() + ".");
 
@@ -159,7 +163,8 @@ public class WalkSessionActivity extends AppCompatActivity {
         tvStatus.setText(getString(R.string.tvStatusText,"Walk session stopped"));
         handler.removeCallbacks(sendLocationUpdateRunnable);
 
-        // TODO: Save walk session summary to local and remote database (startTime, endTime, destination, status)
+        // TODO: Add walk session to local database (userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status)
+        // TODO: Add walk session to remote database (sectionId, userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status)
 
         if (arrived) {
             sendNotification("I have arrived at " + destination.getName() + ".");
