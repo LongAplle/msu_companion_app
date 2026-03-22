@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "contacts")
 public class Contact {
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public int userId = 1;  // Foreign key
+    public int id;  // ID of contact
+    public int userId = 1;  // Foreign key to the user who has this contact
     public String name;
     public String phoneNumber;
 

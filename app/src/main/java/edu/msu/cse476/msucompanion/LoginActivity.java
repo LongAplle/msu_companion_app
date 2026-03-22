@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // TODO: User Authentication with Server Database
         if (true) {
-            // TODO: Get User data from server
+            // TODO: Get User data from server (userId, full name, username, password + Contacts + Session History)
 
             // Save credentials to SharedPreferences (local)
             SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);

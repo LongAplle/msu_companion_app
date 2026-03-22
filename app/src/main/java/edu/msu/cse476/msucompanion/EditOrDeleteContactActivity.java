@@ -1,6 +1,8 @@
 package edu.msu.cse476.msucompanion;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -14,10 +16,20 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
 
     int contactId;
 
+    private int currUserId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_or_delete_contact);
+
+        // Get current user
+        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        currUserId = prefs.getInt("userId", 0);
+        if (currUserId == 0) {
+            finish();
+            return;
+        }
 
         // Get data from intent
         Intent intent = getIntent();
