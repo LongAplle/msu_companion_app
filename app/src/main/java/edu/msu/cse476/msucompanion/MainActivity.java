@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onViewSessionHistory(View view) {
-        // TODO: Add the on view session history functionality
+        // TODO: Add view session history functionality
     }
 
     public void onStartSession(View view) {
