@@ -3,12 +3,17 @@ package edu.msu.cse476.msucompanion;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * WalkSessionActivity
@@ -29,7 +34,6 @@ public class WalkSessionActivity extends AppCompatActivity {
     private TextView tvCurrentLocation;
     private TextView tvDistance;
     private TextView tvStatus;
-
     private Button btnToggleWalk;
 
     // Helper class used to manage GPS/location services
@@ -46,6 +50,16 @@ public class WalkSessionActivity extends AppCompatActivity {
 
     // Prevents multiple arrival triggers once destination is reached
     private boolean arrivalAlreadyHandled = false;
+
+
+    // Handler for periodic SMS updates
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable sendLocationUpdateRunnable;
+    private Location lastKnownLocation;
+
+
+    // Store contact phone numbers (to be fetched at start)
+    private List<String> contactPhones = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,27 +101,25 @@ public class WalkSessionActivity extends AppCompatActivity {
     }
 
     /*
-     * startWalkSession
-     *
      * Starts tracking the user's location in real time.
      * If location permission is not granted, it requests permission first.
      */
     private void startWalkSession() {
-
         // Check if the app has location permission
         if (!locationHelper.hasLocationPermission()) {
             locationHelper.requestLocationPermission(this);
             return;
         }
 
+        // TODO: Fetch trusted contacts from Room
+
+        sendNotification("I'm starting a walk to " + destination.getName() + ".");
+
         arrivalAlreadyHandled = false;
         walkSessionActive = true;
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
 
-        /*
-         * Begin receiving GPS location updates through LocationHelper.
-         * Each update triggers handleLocationUpdate().
-         */
+        // Start GPS updates
         locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
 
             @Override
@@ -121,31 +133,60 @@ public class WalkSessionActivity extends AppCompatActivity {
                 tvStatus.setText(getString(R.string.tvStatusText,"Error - " + message));
             }
         });
+
+        // Start periodic location SMS every (5) minutes
+        sendLocationUpdateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (walkSessionActive && lastKnownLocation != null) {
+                    double lat = lastKnownLocation.getLatitude();
+                    double lng = lastKnownLocation.getLongitude();
+                    String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
+                    sendNotification("My current location: " + mapsLink);
+                }
+                if (walkSessionActive) {
+                    handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes
+                }
+            }
+        };
+        handler.post(sendLocationUpdateRunnable);
     }
 
     /*
-     * stopWalkSession
-     *
      * Stops tracking the user's location and ends the walk session.
      */
-    private void stopWalkSession() {
+    private void stopWalkSession(boolean arrived) {
         walkSessionActive = false;
         locationHelper.stopLocationUpdates();
         tvStatus.setText(getString(R.string.tvStatusText,"Walk session stopped"));
+        handler.removeCallbacks(sendLocationUpdateRunnable);
+
+        // TODO: Save walk session summary to local and remote database (startTime, endTime, destination, status)
+
+        if (arrived) {
+            sendNotification("I have arrived at " + destination.getName() + ".");
+        }
+        else {
+            double lat = lastKnownLocation.getLatitude();
+            double lng = lastKnownLocation.getLongitude();
+            String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
+            sendNotification("I stopped the walk. My final destination: " + mapsLink);
+        }
+
+        // Close the activity so a new session must be started from the destination picker
+        finish();
+
     }
 
     /*
-     * handleLocationUpdate
-     *
      * Called every time the user's GPS location changes.
      * Updates the UI and checks whether the destination has been reached.
      */
     private void handleLocationUpdate(Location location) {
-
-        // Ignore updates if session isn't active or data is invalid
         if (!walkSessionActive || location == null || destination == null) {
             return;
         }
+        lastKnownLocation = location;
 
         // Retrieve the user's current coordinates
         double lat = location.getLatitude();
@@ -160,20 +201,9 @@ public class WalkSessionActivity extends AppCompatActivity {
                 destination.getLatitude(),
                 destination.getLongitude()
         );
-
-        // Display distance to destination
         tvDistance.setText(getString(R.string.tvDistanceText,distance));
 
-        /*
-         * Send the location update to other parts of the system.
-         * This will eventually be used for backend updates or trusted contact notifications.
-         */
-        sendLocationUpdateToServerOrContact(lat, lng, distance);
-
-        /*
-         * Check whether the user has arrived at the destination.
-         * Arrival is detected if the distance is within the defined threshold.
-         */
+        // Arrival detection
         if (!arrivalAlreadyHandled &&
                 LocationUtility.hasArrived(location, destination, ARRIVAL_THRESHOLD_METERS)) {
 
@@ -183,8 +213,6 @@ public class WalkSessionActivity extends AppCompatActivity {
     }
 
     /*
-     * onArrivalDetected
-     *
      * Called once the user is within the arrival threshold distance.
      * Triggers safe arrival notification.
      */
@@ -192,47 +220,29 @@ public class WalkSessionActivity extends AppCompatActivity {
         tvStatus.setText(getString(R.string.tvStatusText,"Arrived safely"));
 
         Toast.makeText(this, "Safe arrival detected!", Toast.LENGTH_LONG).show();
-
-        sendArrivalNotification();
-
-        stopWalkSession();
+        stopWalkSession(true);
     }
 
     /*
-     * sendLocationUpdateToServerOrContact
-     *
-     * Placeholder method for future integration with backend services.
-     * This could send the user's location to:
-     * - a server
-     * - a trusted contact
-     * - a database
+     * Send a notification to all trusted contacts
      */
-    private void sendLocationUpdateToServerOrContact(double lat, double lng, float distance) {
-        // TODO: Implement sending location updates to server or trusted contact
+    private void sendNotification(String message) {
+        // TODO: Send SMS message to all trusted contacts
     }
 
     /*
-     * sendArrivalNotification
-     *
-     * Placeholder for notifying a trusted contact that the user has arrived safely.
+     * Toggle the start/stop button
      */
-    private void sendArrivalNotification() {
-        // TODO: Notify trusted contact of safe arrival
-    }
-
     private void toggleStartStop(){
         if (!walkSessionActive) {
             startWalkSession();
             btnToggleWalk.setText(getString(R.string.endWalkText));
         } else {
-            stopWalkSession();
-            btnToggleWalk.setText(getString(R.string.startWalkText));
+            stopWalkSession(false);
         }
     }
 
     /*
-     * onDestroy
-     *
      * Ensures location tracking stops when the activity is destroyed.
      * This prevents unnecessary GPS usage and battery drain.
      */
@@ -246,8 +256,6 @@ public class WalkSessionActivity extends AppCompatActivity {
     }
 
     /*
-     * onRequestPermissionsResult
-     *
      * Handles the result of the location permission request.
      * If permission is granted, the walk session begins automatically.
      */
