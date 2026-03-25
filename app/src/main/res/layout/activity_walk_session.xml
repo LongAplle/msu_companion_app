@@ -46,14 +46,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Start Walk Session" />
+            android:text="Start Walk Session"
+            android:backgroundTint="@color/msu_green"/>/>
 
         <Button
             android:id="@+id/btnStopWalk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Stop Walk Session" />
+            android:text="Stop Walk Session"
+            android:backgroundTint="@color/msu_green"/>/>
 
     </LinearLayout>
 </ScrollView>

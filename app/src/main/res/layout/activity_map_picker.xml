@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnSearchPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search for destination" />
+
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tvSelectedPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="No destination selected"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnUseSelectedLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Use selected location" />
+
+</LinearLayout>

@@ -39,11 +39,6 @@ public class MainActivity extends AppCompatActivity {
         // User is logged in, proceed with normal UI
         setContentView(R.layout.activity_main);
 
-        // GPS button (added)
-        Button testGpsButton = findViewById(R.id.testGpsButton);
-
-        // Start Walk button (added)
-        Button startWalkButton = findViewById(R.id.startWalkButton);
 
         // Initialize GPS helper
         locationHelper = new LocationHelper(this);
@@ -52,50 +47,6 @@ public class MainActivity extends AppCompatActivity {
         TextView greetingText = findViewById(R.id.greetingText);
         String greetingMsg = getString(R.string.greetingText, displayName);
         greetingText.setText(greetingMsg);
-
-        // GPS TEST BUTTON LISTENER (added)
-        testGpsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (!locationHelper.hasLocationPermission()) {
-                    locationHelper.requestLocationPermission(MainActivity.this);
-                    return;
-                }
-
-                locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
-
-                    @Override
-                    public void onLocationUpdated(Location location) {
-
-                        double lat = location.getLatitude();
-                        double lng = location.getLongitude();
-
-                        greetingText.setText(
-                                "Hello, " + username + "!\n\n" +
-                                        "Current Location:\n" +
-                                        "Lat: " + lat + "\n" +
-                                        "Lng: " + lng
-                        );
-                    }
-
-                    @Override
-                    public void onLocationError(String message) {
-                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            }
-        });
-
-        // START WALK BUTTON LISTENER (added)
-        startWalkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, DestinationPickerActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     public void onLogOut(View view) {

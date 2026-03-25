@@ -2,7 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.ansdroid.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -84,18 +84,6 @@
         android:text="@string/LogoutText"
         android:backgroundTint="@color/msu_green"/>
 
-    <!-- TEMPORARY GPS TEST BUTTON -->
-    <Button
-        android:id="@+id/testGpsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Test GPS Tracking" />
 
-    <Button
-        android:id="@+id/startWalkButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Safe Walk"/>
 
 </LinearLayout>

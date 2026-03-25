@@ -22,10 +22,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".DestinationPickerActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".WalkSessionActivity"
             android:exported="false" />
 
@@ -45,6 +41,12 @@
         <activity
             android:name=".CurrentSessionActivity"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <activity android:name=".MapPickerActivity" android:exported="false" />
 
     </application>
 

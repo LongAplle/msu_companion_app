@@ -37,8 +37,10 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:hint="@string/destination_hint"
-            android:inputType="textPostalAddress"
-            android:autofillHints="postalAddress"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:inputType="none"
             android:layout_marginBottom="24dp" />
 
         <TextView

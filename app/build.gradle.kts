@@ -16,6 +16,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS_API_KEY"] = "AIzaSyAe8un_fWR4yH7DSBIBauvyhG_UmkUlQ6o"
+        buildConfigField("String", "PLACES_API_KEY", "\"AIzaSyAe8un_fWR4yH7DSBIBauvyhG_UmkUlQ6o\"")
+
+
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -39,6 +47,8 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.places)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
