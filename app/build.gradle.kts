@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    //for google services
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -47,4 +49,11 @@ dependencies {
     // Room
     annotationProcessor(libs.room.compiler)
     implementation(libs.room.ktx)
+
+    // Firebase BoM — manages all Firebase library versions
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-auth")
+
 }

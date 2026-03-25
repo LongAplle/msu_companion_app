@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "579219125544",
+    "project_id": "safewalk-team",
+    "storage_bucket": "safewalk-team.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:579219125544:android:cc3ead50a7b999577ecc1d",
+        "android_client_info": {
+          "package_name": "edu.msu.cse476.msucompanion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY0RrTxw9Y6sUZ7-D3QCuvqn8GVLkY2Bg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

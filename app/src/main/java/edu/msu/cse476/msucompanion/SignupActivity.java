@@ -12,6 +12,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class SignupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +26,6 @@ public class SignupActivity extends AppCompatActivity {
 
         TextView goBack = findViewById(R.id.goBackFromSignup);
         goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-
     }
 
     public void onGoBackToLogin(View view) {
@@ -32,39 +37,60 @@ public class SignupActivity extends AppCompatActivity {
     public void onSignUp(View view) {
         EditText fullNameEditText = findViewById(R.id.fullName);
         EditText usernameEditText = findViewById(R.id.username);
+        EditText emailEditText = findViewById(R.id.email);
         EditText passwordEditText = findViewById(R.id.password);
         EditText passwordRetypeEditText = findViewById(R.id.passwordRetype);
 
         String fullName = fullNameEditText.getText().toString().trim();
         String username = usernameEditText.getText().toString().trim();
+        String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
         String password2 = passwordRetypeEditText.getText().toString();
 
-        if (password.equals(password2) && !username.isEmpty()) {
-            // TODO: Password Requirement Check
-            // TODO: Username Exist Check (using username)
-            // TODO: Add User Data to Server Database (userId, fullName, username, password hash)
+        if (password.equals(password2) && !username.isEmpty() && !email.isEmpty()) {
 
-            // Save credentials to SharedPreferences (local)
-            SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putInt("userId", 1);  // TODO: get userId from server
-            editor.putString("full_name", fullName);
-            editor.putString("username", username);
-            editor.putString("password", password);
-            editor.apply();
+            // Firebase Auth handles password hashing securely
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(authResult -> {
+                        String uid = authResult.getUser().getUid();
 
-            Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
+                        // Store extra user info in Firestore using Auth uid as document ID
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("fullName", fullName);
+                        user.put("username", username);
+                        user.put("email", email);
 
-            // Go to MainActivity
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish(); // Close SignupActivity so user can't go back
+                        FirebaseFirestore.getInstance().collection("users")
+                                .document(uid)
+                                .set(user)
+                                .addOnSuccessListener(unused -> {
+                                    // Save to SharedPreferences after both Auth and Firestore succeed
+                                    SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = prefs.edit();
+                                    editor.putString("userId", uid); //firestore string ID
+                                    editor.putInt("userIdLocal", 1); // Local Room int ID - hardcoded bc we assume 1 device per user
+                                    editor.putString("full_name", fullName);
+                                    editor.putString("username", username);
+                                    editor.putString("email", email);
+                                    editor.apply();
+
+                                    Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
 
         } else {
             passwordEditText.setText("");
             passwordRetypeEditText.setText("");
-            Toast.makeText(this, "Signup Failed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Passwords do not match or fields are empty", Toast.LENGTH_SHORT).show();
         }
     }
 }
