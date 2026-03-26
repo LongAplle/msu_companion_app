@@ -47,7 +47,7 @@ public class WalkSessionActivity extends AppCompatActivity {
     private String buddyPhone;
 
     // Distance threshold used to determine arrival (in meters)
-    private static final float ARRIVAL_THRESHOLD_METERS = 180.0f;
+    private static final float ARRIVAL_THRESHOLD_METERS = 200.0f;
 
     // Tracks whether a walk session is currently active
     private boolean walkSessionActive = false;
