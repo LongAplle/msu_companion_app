@@ -108,19 +108,25 @@ public class LocationHelper {
             return;
         }
 
-        // Request the last known location from the fused provider
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
+        try {
+            // Request the last known location from the fused provider
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
 
-                    // If location exists, return it to the listener
-                    if (location != null) {
-                        listener.onLocationUpdated(location);
-                    } else {
-                        listener.onLocationError("Could not get last known location.");
-                    }
-                })
-                .addOnFailureListener(e ->
-                        listener.onLocationError("Error getting location: " + e.getMessage()));
+                        // If location exists, return it to the listener
+                        if (location != null) {
+                            listener.onLocationUpdated(location);
+                        } else {
+                            listener.onLocationError("Could not get last known location.");
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            listener.onLocationError("Error getting location: " + e.getMessage()));
+        } catch (SecurityException e) {
+            listener.onLocationError("Location permission was revoked.");
+        }
+
+
     }
 
     /*
@@ -171,18 +177,16 @@ public class LocationHelper {
             }
         };
 
-        /*
-         * Start requesting location updates.
-         * Updates are delivered on the main application thread.
-         */
-        fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-        );
-
-        // Mark that tracking has started
-        isTracking = true;
+        try {
+            fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+            );
+            isTracking = true;
+        } catch (SecurityException e) {
+            listener.onLocationError("Location permission was revoked.");
+        }
     }
 
     /*

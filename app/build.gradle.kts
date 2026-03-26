@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    // for google services
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -16,10 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         manifestPlaceholders["MAPS_API_KEY"] = "AIzaSyAe8un_fWR4yH7DSBIBauvyhG_UmkUlQ6o"
         buildConfigField("String", "PLACES_API_KEY", "\"AIzaSyAe8un_fWR4yH7DSBIBauvyhG_UmkUlQ6o\"")
-
-
     }
 
     buildFeatures {
@@ -35,6 +36,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -46,10 +48,22 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("com.google.android.material:material:1.9.0")
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
     implementation(libs.places)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Room
+    annotationProcessor(libs.room.compiler)
+    implementation(libs.room.ktx)
+
+    // Firebase BoM — manages all Firebase library versions
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-auth")
 }

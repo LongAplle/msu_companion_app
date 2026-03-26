@@ -24,30 +24,35 @@ public class LoginActivity extends AppCompatActivity {
         String username = usernameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
 
-        // TODO: User Authentication (with Server Database figured out)
+        // TODO: User Authentication with Server Database
         if (true) {
+            // TODO: Get User data from server (userId, fullName, username, password + Contacts + Session History)
+
             // Save credentials to SharedPreferences (local)
             SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("userId", 1);
             editor.putString("username", username);
             editor.putString("password", password);
             editor.apply();
 
-            Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+            // TODO: Populate local Contact and Session History
+
+            Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
 
             // Go to MainActivity
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish(); // Close LoginActivity so user can't go back
 
         } else {
-            Toast.makeText(LoginActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Login Failed!", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void onSignUp(View view) {
-        // Go to MainActivity
-        Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+        // Go to SignupActivity
+        Intent intent = new Intent(this, SignupActivity.class);
         startActivity(intent);
     }
 }

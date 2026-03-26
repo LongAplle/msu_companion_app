@@ -40,29 +40,31 @@ public class SignupActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         String password2 = passwordRetypeEditText.getText().toString();
 
-        if (password.equals(password2) && !username.isEmpty() && !fullName.isEmpty()) {
-            //TODO: Add password requirements
-            //TODO: Add User Info to Server Database (including checking if user already exists)
+        if (password.equals(password2) && !username.isEmpty()) {
+            // TODO: Password Requirement Check
+            // TODO: Username Exist Check (using username)
+            // TODO: Add User Data to Server Database (userId, fullName, username, password hash)
 
             // Save credentials to SharedPreferences (local)
             SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("userId", 1);  // TODO: get userId from server
             editor.putString("full_name", fullName);
             editor.putString("username", username);
             editor.putString("password", password);
             editor.apply();
 
-            Toast.makeText(SignupActivity.this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
 
             // Go to MainActivity
-            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish(); // Close SignupActivity so user can't go back
 
         } else {
             passwordEditText.setText("");
             passwordRetypeEditText.setText("");
-            Toast.makeText(SignupActivity.this, "Signup Failed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Signup Failed!", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -6,8 +6,26 @@
     <string name="greetingText">Hello, %1$s!</string>
     <string name="signupText">Sign Up</string>
     <string name="passwordRetypeHint">Retype Password</string>
-    <string name="LogoutText">Logout</string>
+    <string name="logoutText">Logout</string>
     <string name="signupQuery">Not yet registered?</string>
+    <string name="addContact">Add New Contact</string>
+    <string name="addContactText">Add Contact</string>
+    <string name="contactNameHint">Name</string>
+    <string name="contactPhoneHint">Phone Number</string>
+    <string name="saveText">Save</string>
+    <string name="contactViewText">View Trusted Contacts</string>
+    <string name="sessionViewText">View Session History</string>
+    <string name="searchContactHint">Search by Name or Phone Number</string>
+    <string name="editContactText">Edit Contact</string>
+    <string name="deleteText">Delete</string>
+
+    <string name="chooseDestinationText">Choose Destination</string>
+    <string name="tvDestinationText">Destination: %1$s</string>
+    <string name="tvCurrentLocationText">Current Location: %1$s</string>
+    <string name="tvDistanceText">Distance to destination: %.2f meters</string>
+    <string name="tvStatusText">Status: %1$s</string>
+    <string name="startWalkText">Start Walk Session</string>
+    <string name="endWalkText">End Walk Session</string>
 
     <string name="createSession">Create a new session</string>
     <string name="sessionTitle">Start a new session</string>
