@@ -155,9 +155,12 @@ public class WalkSessionActivity extends AppCompatActivity {
         session.put("destinationName", destination.getName());
         session.put("destinationLat", destination.getLatitude());
         session.put("destinationLng", destination.getLongitude());
+<<<<<<< HEAD
         session.put("typedDestination", typedDestination);
         session.put("buddyName", buddyName);
         session.put("buddyPhone", buddyPhone);
+=======
+>>>>>>> origin/master
         session.put("startTime", sessionStartTime);
         session.put("endTime", null);
         session.put("status", "active");
@@ -261,7 +264,11 @@ public class WalkSessionActivity extends AppCompatActivity {
 
         if (arrived) {
             sendNotification("I have arrived at " + destination.getName() + ".");
+<<<<<<< HEAD
         } else if (lastKnownLocation != null) {
+=======
+        } else {
+>>>>>>> origin/master
             double lat = lastKnownLocation.getLatitude();
             double lng = lastKnownLocation.getLongitude();
             String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
