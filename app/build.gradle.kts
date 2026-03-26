@@ -1,10 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-<<<<<<< HEAD
     // for google services
-=======
-    //for google services
->>>>>>> origin/master
     id("com.google.gms.google-services")
 }
 
@@ -70,8 +66,4 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-auth")
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 }
