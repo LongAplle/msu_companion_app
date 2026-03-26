@@ -106,7 +106,7 @@ public class WalkSessionActivity extends AppCompatActivity {
         double destinationLat = getIntent().getDoubleExtra("destination_lat", 0.0);
         double destinationLng = getIntent().getDoubleExtra("destination_lng", 0.0);
 
-        // Newer frontend/session flow extras
+        // Session/contact data from SessionActivity / map flow
         typedDestination = getIntent().getStringExtra("typed_destination");
         buddyName = getIntent().getStringExtra("buddyName");
         buddyPhone = getIntent().getStringExtra("buddyPhone");
@@ -155,12 +155,9 @@ public class WalkSessionActivity extends AppCompatActivity {
         session.put("destinationName", destination.getName());
         session.put("destinationLat", destination.getLatitude());
         session.put("destinationLng", destination.getLongitude());
-<<<<<<< HEAD
         session.put("typedDestination", typedDestination);
         session.put("buddyName", buddyName);
         session.put("buddyPhone", buddyPhone);
-=======
->>>>>>> origin/master
         session.put("startTime", sessionStartTime);
         session.put("endTime", null);
         session.put("status", "active");
@@ -168,7 +165,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         db.collection("sessions")
                 .add(session)
                 .addOnSuccessListener(documentReference -> {
-                    // Save the session ID so we can update it when the walk ends
                     currentSessionId = documentReference.getId();
                 })
                 .addOnFailureListener(e -> {
@@ -197,15 +193,13 @@ public class WalkSessionActivity extends AppCompatActivity {
                     double lat = lastKnownLocation.getLatitude();
                     double lng = lastKnownLocation.getLongitude();
 
-                    // Send SMS notification with maps link
                     String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
                     sendNotification("My current location: " + mapsLink);
 
-                    // Also ping location to Firestore under the current session
                     addLocationPing(lat, lng);
                 }
                 if (walkSessionActive) {
-                    handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes
+                    handler.postDelayed(this, 5 * 60 * 1000);
                 }
             }
         };
@@ -217,7 +211,6 @@ public class WalkSessionActivity extends AppCompatActivity {
      * Called every 5 minutes and on session end.
      */
     private void addLocationPing(double lat, double lng) {
-        // Don't ping if there's no active session in Firestore yet
         if (currentSessionId == null) return;
 
         Map<String, Object> ping = new HashMap<>();
@@ -225,8 +218,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         ping.put("lng", lng);
         ping.put("timestamp", new Date());
 
-        // Pings are stored as a sub-collection under the session document
-        // structure: sessions/{sessionId}/pings/{pingId}
         db.collection("sessions")
                 .document(currentSessionId)
                 .collection("pings")
@@ -242,7 +233,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session stopped"));
         handler.removeCallbacks(sendLocationUpdateRunnable);
 
-        // Write a final location ping before closing the session
         if (lastKnownLocation != null) {
             addLocationPing(
                     lastKnownLocation.getLatitude(),
@@ -250,8 +240,6 @@ public class WalkSessionActivity extends AppCompatActivity {
             );
         }
 
-        // Update the session document in Firestore with end time and final status
-        // TODO: Add walk session to local database (userId, startTime, endTime, destinationName, destinationLat, destinationLng, status)
         if (currentSessionId != null) {
             Map<String, Object> updates = new HashMap<>();
             updates.put("endTime", new Date());
@@ -264,18 +252,13 @@ public class WalkSessionActivity extends AppCompatActivity {
 
         if (arrived) {
             sendNotification("I have arrived at " + destination.getName() + ".");
-<<<<<<< HEAD
         } else if (lastKnownLocation != null) {
-=======
-        } else {
->>>>>>> origin/master
             double lat = lastKnownLocation.getLatitude();
             double lng = lastKnownLocation.getLongitude();
             String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
             sendNotification("I stopped the walk. My final location: " + mapsLink);
         }
 
-        // Close the activity so a new session must be started from the destination picker / session flow
         finish();
     }
 
@@ -289,11 +272,9 @@ public class WalkSessionActivity extends AppCompatActivity {
         }
         lastKnownLocation = location;
 
-        // Retrieve the user's current coordinates
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
-        // Display current GPS location on screen
         tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, lat + ", " + lng));
 
         float distance = LocationUtility.distanceInMeters(
@@ -304,7 +285,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         );
         tvDistance.setText(getString(R.string.tvDistanceText, distance));
 
-        // Arrival detection
         if (!arrivalAlreadyHandled &&
                 LocationUtility.hasArrived(location, destination, ARRIVAL_THRESHOLD_METERS)) {
             arrivalAlreadyHandled = true;
@@ -346,10 +326,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         }
     }
 
-    /*
-     * Ensures location tracking stops when the activity is destroyed.
-     * This prevents unnecessary GPS usage and battery drain.
-     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -358,10 +334,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         }
     }
 
-    /*
-     * Handles the result of the location permission request.
-     * If permission is granted, the walk session begins automatically.
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
