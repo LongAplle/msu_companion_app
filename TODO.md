@@ -13,8 +13,8 @@
 - [ ] Add walk session to remote database (sectionId, userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status) (WalkSessionActivity)
 
 ## GPS:
-- [ ] Make choosing Destination via Map or Search Bar instead of Buttons (DestinationPickerActivity)
-- [ ] Implement a live map feature (WalkSessionActivity, walk_session layout)
+- [ DONE] Make choosing Destination via Map or Search Bar instead of Buttons (DestinationPickerActivity)
+- [] Implement a live map feature (WalkSessionActivity, walk_session layout)
 
 ## SMS:
 - [ ] Send SMS message to all trusted contacts (WalkSessionActivity)
