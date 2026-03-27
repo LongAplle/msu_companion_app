@@ -12,10 +12,10 @@
 
 ## UI:
 - [ ] layout: add_contact, contact_list, destination_picker, edit_or_delete, walk_session, session_history
-- [ ] delete redundant layout and activity (activity_session.xml, activity_current_session.xml, SessionActivity, CurrentSessionActivity)
 
 ## Other:
 - [ ] Add view session history functionality (Main Acitivity)
-- [ ] Fetch trusted contacts from local database (WalkSessionActivity)
 - [ ] Add walk session to local database (userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status) (WalkSessionActivity)
+
+- [ ] Implement foreground service for the app
 
