@@ -1,106 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SessionActivity" >
+    xmlns:andriod="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".SessionActivity">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/sessionTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sessionTitle"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/destinationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/finalDest"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/destinationInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp" >
+        android:minHeight="48dp"
+        android:hint="@string/destination_hint"
+        android:focusable="false"
+        android:clickable="true"
+        android:cursorVisible="false"
+        android:inputType="none"
+        android:layout_marginBottom="24dp" />
 
-        <TextView
-            android:id="@+id/sessionTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sessionTitle"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="32dp" />
+    <Button
+        android:id="@+id/startWalkingButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sessionTitle"
+        android:onClick="onStartSession"
+        android:backgroundTint="@color/msu_green"/>
 
-        <TextView
-            android:id="@+id/destinationLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/finalDest"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+    <TextView
+        android:id="@+id/goBackFromSession"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="48dp"
+        android:onClick="onGoBackToMain"
+        android:text="@string/GoBack"
+        android:textSize="14sp" />
 
-        <EditText
-            android:id="@+id/destinationInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:hint="@string/destination_hint"
-            android:focusable="false"
-            android:clickable="true"
-            android:cursorVisible="false"
-            android:inputType="none"
-            android:layout_marginBottom="24dp" />
+    <ImageView
+        android:id="@+id/loginLogo"
+        android:layout_width="264dp"
+        android:layout_height="79dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="250dp"
+        android:contentDescription="@string/msu_companion_logo"
+        android:src="@drawable/msucompanionlogo" />
 
-        <TextView
-            android:id="@+id/buddyPrompt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/buddy_prompt"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <EditText
-            android:id="@+id/buddyNameInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:hint="@string/buddy_name_hint"
-            android:inputType="textPersonName"
-            android:autofillHints="name"
-            android:layout_marginBottom="12dp" />
-
-        <EditText
-            android:id="@+id/buddyPhoneInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:hint="@string/buddy_phone_hint"
-            android:inputType="phone"
-            android:autofillHints="phone"
-            android:layout_marginBottom="24dp" />
-
-        <Button
-            android:id="@+id/startWalkingButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/sessionTitle"
-            android:onClick="onStartSess"
-            android:backgroundTint="@color/msu_green"/>
-
-        <TextView
-            android:id="@+id/goBackFromSession"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="48dp"
-            android:onClick="onGoBackToMain"
-            android:text="@string/GoBack"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:id="@+id/loginLogo"
-            android:layout_width="264dp"
-            android:layout_height="79dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="250dp"
-            android:contentDescription="@string/msu_companion_logo"
-            android:src="@drawable/msucompanionlogo" />
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

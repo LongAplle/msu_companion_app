@@ -15,9 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class SessionActivity extends AppCompatActivity {
 
     private EditText destinationEditText;
-    private EditText buddyNameEditText;
-    private EditText buddyPhoneEditText;
-
     private String selectedDestinationName;
     private double selectedDestinationLat;
     private double selectedDestinationLng;
@@ -45,16 +42,13 @@ public class SessionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_session);
 
         destinationEditText = findViewById(R.id.destinationInput);
-        buddyNameEditText = findViewById(R.id.buddyNameInput);
-        buddyPhoneEditText = findViewById(R.id.buddyPhoneInput);
+        destinationEditText.setOnClickListener( v -> onOpenMapPicker());
 
         TextView goBack = findViewById(R.id.goBackFromSession);
         goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-
-        destinationEditText.setOnClickListener(v -> openMapPicker());
     }
 
-    private void openMapPicker() {
+    public void onOpenMapPicker() {
         Intent intent = new Intent(SessionActivity.this, MapPickerActivity.class);
         mapPickerLauncher.launch(intent);
     }
@@ -65,17 +59,10 @@ public class SessionActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onStartSess(View view) {
-        String buddyName = buddyNameEditText.getText().toString().trim();
-        String buddyPhone = buddyPhoneEditText.getText().toString().trim();
+    public void onStartSession(View view) {
 
         if (!hasSelectedDestination) {
             Toast.makeText(this, "Please select a destination from the map", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (buddyName.isEmpty() || buddyPhone.isEmpty()) {
-            Toast.makeText(this, "Please fill out all buddy fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -83,8 +70,6 @@ public class SessionActivity extends AppCompatActivity {
         intent.putExtra("destination_name", selectedDestinationName);
         intent.putExtra("destination_lat", selectedDestinationLat);
         intent.putExtra("destination_lng", selectedDestinationLng);
-        intent.putExtra("buddyName", buddyName);
-        intent.putExtra("buddyPhone", buddyPhone);
         startActivity(intent);
     }
 }
