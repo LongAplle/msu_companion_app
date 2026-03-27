@@ -67,7 +67,7 @@ public class WalkSessionActivity extends AppCompatActivity {
     private Runnable sendLocationUpdateRunnable;
     private Location lastKnownLocation;
 
-    // Store contact phone numbers (to be fetched at start)
+    // All trusted contact phone numbers (to be fetched at start)
     private List<String> contactPhones = new ArrayList<>();
 
     // Session start time and start location
@@ -236,6 +236,10 @@ public class WalkSessionActivity extends AppCompatActivity {
      * Stops tracking the user's location and ends the walk session.
      */
     private void stopWalkSession(boolean arrived) {
+        if (!walkSessionActive) {
+            return;
+        }
+
         walkSessionActive = false;
         locationHelper.stopLocationUpdates();
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session stopped"));
@@ -346,9 +350,10 @@ public class WalkSessionActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (locationHelper != null) {
-            locationHelper.stopLocationUpdates();
-        }
+
+        // TODO: implement a foreground service so the walk can survive app closure and system kills
+
+        stopWalkSession(false);
     }
 
     /*
