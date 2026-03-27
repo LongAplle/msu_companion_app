@@ -28,12 +28,9 @@ public interface ContactDao {
     @Query("SELECT * FROM contacts WHERE userId = :userId")
     List<Contact> getContactsForUser(int userId);
 
-    @Query("SELECT * FROM contacts WHERE userId = :userId AND phoneNumber LIKE '%' || :phone || '%'")
-    List<Contact> getContactsByPhone(String phone, int userId);
-
-    @Query("SELECT * FROM contacts WHERE userId = :userId AND name LIKE '%' || :name || '%'")
-    List<Contact> getContactsByName(String name, int userId);
-
     @Query("SELECT * FROM contacts WHERE userId = :userId AND phoneNumber LIKE '%' || :query || '%' OR name LIKE '%' || :query || '%'")
     List<Contact> searchContacts(int userId, String query);
+
+    @Query("SELECT phoneNumber FROM contacts WHERE userId = :userId")
+    List<String> getAllPhoneNumber(int userId);
 }
