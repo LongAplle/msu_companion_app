@@ -18,10 +18,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        String username = prefs.getString("username", null);
+
+        String userId = prefs.getString("userId", null);
+        String email = prefs.getString("email", null);
         String fullName = prefs.getString("full_name", null);
 
-        if (username == null) {
+        if (userId == null) {
             // No user logged in → go to LoginActivity
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -32,7 +34,15 @@ public class MainActivity extends AppCompatActivity {
         // User is logged in, proceed with normal UI
         setContentView(R.layout.activity_main);
 
-        String displayName = (fullName != null && !fullName.isEmpty()) ? fullName : username;
+        String displayName;
+        if (fullName != null && !fullName.isEmpty()) {
+            displayName = fullName;
+        } else if (email != null && !email.isEmpty()) {
+            displayName = email;
+        } else {
+            displayName = "User";
+        }
+
         TextView greetingText = findViewById(R.id.greetingText);
         String greetingMsg = getString(R.string.greetingText, displayName);
         greetingText.setText(greetingMsg);
@@ -53,13 +63,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLogOut(View view) {
-        // Clear Room data
-        int currUserId = prefs.getInt("userId", 0);
-        new Thread(() -> AppDatabase.getInstance(this).contactDao()
-                .deleteContactsForUser(String.valueOf(currUserId))).start();
+        // Clear Room data for the current user
+        String currUserId = prefs.getString("userId", null);
+        if (currUserId != null) {
+            new Thread(() -> AppDatabase.getInstance(this).contactDao()
+                    .deleteContactsForUser(currUserId)).start();
+        }
 
         // Clear stored credentials
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
 
         Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
