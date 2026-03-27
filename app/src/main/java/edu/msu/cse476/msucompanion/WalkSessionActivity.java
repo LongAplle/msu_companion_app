@@ -41,25 +41,23 @@ public class WalkSessionActivity extends AppCompatActivity {
     // Destination selected by the user
     private Destination destination;
 
-    // Session/contact data passed from SessionActivity / map flow
-    private String typedDestination;
-    private String buddyName;
-    private String buddyPhone;
 
     // Distance threshold used to determine arrival (in meters)
     private static final float ARRIVAL_THRESHOLD_METERS = 200.0f;
 
-    // Tracks whether a walk session is currently active
+    // Session states
     private boolean walkSessionActive = false;
-
-    // Prevents multiple arrival triggers once destination is reached
     private boolean arrivalAlreadyHandled = false;
 
-    // Current user ID — stored as String since Firestore IDs are strings
+    // Remote user ID
     private String currUserId;
 
     // Firestore session document ID — used to update the session on end
     private String currentSessionId;
+
+    // Local user ID
+    private int currUserIdLocal;
+
 
     // Firestore instance for saving session and ping data
     private FirebaseFirestore db;
@@ -72,8 +70,9 @@ public class WalkSessionActivity extends AppCompatActivity {
     // Store contact phone numbers (to be fetched at start)
     private List<String> contactPhones = new ArrayList<>();
 
-    // Timestamp for when the walk session started
+    // Session start time and start location
     private Date sessionStartTime;
+    private Location startLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +83,7 @@ public class WalkSessionActivity extends AppCompatActivity {
         // Note: userId is a String (Firestore auto-generated ID)
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         currUserId = prefs.getString("userId", null);
+        currUserIdLocal = prefs.getInt("userIdLocal", 0);
         if (currUserId == null) {
             finish();
             return;
@@ -105,11 +105,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         String destinationName = getIntent().getStringExtra("destination_name");
         double destinationLat = getIntent().getDoubleExtra("destination_lat", 0.0);
         double destinationLng = getIntent().getDoubleExtra("destination_lng", 0.0);
-
-        // Session/contact data from SessionActivity / map flow
-        typedDestination = getIntent().getStringExtra("typed_destination");
-        buddyName = getIntent().getStringExtra("buddyName");
-        buddyPhone = getIntent().getStringExtra("buddyPhone");
 
         /*
          * Temporary fallback in case the destination name was not passed.
@@ -140,9 +135,18 @@ public class WalkSessionActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO: Fetch trusted contacts from local database
+        // Fetch all trusted contacts from local database
+        new Thread(() -> {
+            List<String> phones = AppDatabase.getInstance(this)
+                    .contactDao()
+                    .getAllPhoneNumber(currUserIdLocal);
+            runOnUiThread(() -> {
+                contactPhones = phones;
 
-        sendNotification("I'm starting a walk to " + destination.getName() + ".");
+                // Send initial SMS
+                sendNotification("I'm starting a walk to " + destination.getName() + ".");
+            });
+        }).start();
 
         arrivalAlreadyHandled = false;
         walkSessionActive = true;
@@ -156,9 +160,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         session.put("destinationName", destination.getName());
         session.put("destinationLat", destination.getLatitude());
         session.put("destinationLng", destination.getLongitude());
-        session.put("typedDestination", typedDestination);
-        session.put("buddyName", buddyName);
-        session.put("buddyPhone", buddyPhone);
         session.put("startTime", sessionStartTime);
         session.put("endTime", null);
         session.put("status", "active");
@@ -248,8 +249,9 @@ public class WalkSessionActivity extends AppCompatActivity {
             );
         }
 
-        // Update the session document in Firestore with end time and final status
         // TODO: Add walk session to local database (userId, startTime, endTime, destinationName, destinationLat, destinationLng, status)
+
+        // Update the session document in Firestore with end time and final status
         if (currentSessionId != null) {
             Map<String, Object> updates = new HashMap<>();
             updates.put("endTime", new Date());
@@ -320,11 +322,8 @@ public class WalkSessionActivity extends AppCompatActivity {
      * Send a notification to all trusted contacts
      */
     private void sendNotification(String message) {
-        // TODO: Send SMS message to all trusted contacts
-
-        // Temporary placeholder so session flow can still show buddy linkage
-        if (buddyName != null && !buddyName.isEmpty()) {
-            Toast.makeText(this, message + " (Buddy: " + buddyName + ")", Toast.LENGTH_SHORT).show();
+        for (String phoneNumber : contactPhones) {
+            // TODO: Send SMS message to the phoneNumber
         }
     }
 
