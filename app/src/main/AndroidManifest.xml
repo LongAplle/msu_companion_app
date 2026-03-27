@@ -48,9 +48,6 @@
         <activity
             android:name=".SessionActivity"
             android:exported="false" />
-        <activity
-            android:name=".CurrentSessionActivity"
-            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
