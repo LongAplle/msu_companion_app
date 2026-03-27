@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    // for google services
+    //for google services
     id("com.google.gms.google-services")
 }
 
