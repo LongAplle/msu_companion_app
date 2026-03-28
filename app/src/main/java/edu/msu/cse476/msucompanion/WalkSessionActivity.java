@@ -7,7 +7,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,8 +15,27 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +46,7 @@ import java.util.Map;
  * This activity manages the user's walking session. It tracks the user's
  * GPS location in real time and compares it with the selected destination.
  */
-public class WalkSessionActivity extends AppCompatActivity {
+public class WalkSessionActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     // UI components used to display information to the user
     private TextView tvCurrentLocation;
@@ -41,7 +59,6 @@ public class WalkSessionActivity extends AppCompatActivity {
 
     // Destination selected by the user
     private Destination destination;
-
 
     // Distance threshold used to determine arrival (in meters)
     private static final float ARRIVAL_THRESHOLD_METERS = 200.0f;
@@ -61,6 +78,7 @@ public class WalkSessionActivity extends AppCompatActivity {
 
     // App local database
     private AppDatabase db;
+
     // Firestore instance for saving session and ping data
     private FirebaseFirestore firestoreDb;
 
@@ -74,9 +92,24 @@ public class WalkSessionActivity extends AppCompatActivity {
 
     // Session start location
     private Location startLocation;
+
     // Flag for updating the start location
     private boolean startLocationUpdated = false;
 
+    // Google Maps state
+    private GoogleMap googleMap;
+    private Marker currentLocationMarker;
+    private Marker destinationMarker;
+    private Polyline routeLine;
+    private boolean initialCameraFramed = false;
+
+    // Walking-route refresh control
+    private boolean routeRequestInFlight = false;
+    private long lastRouteFetchTimeMs = 0L;
+    private LatLng lastRouteOrigin = null;
+
+    private static final long ROUTE_REFRESH_INTERVAL_MS = 15000L;   // 15 sec
+    private static final float ROUTE_REFRESH_MIN_MOVE_METERS = 25f; // refetch after meaningful movement
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +159,46 @@ public class WalkSessionActivity extends AppCompatActivity {
         tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, "None"));
         tvDistance.setText(getString(R.string.tvDistanceText, Float.NaN));
         tvStatus.setText(getString(R.string.tvStatusText, "Waiting"));
+
+        // Create and attach the map fragment
+        SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mapContainer, mapFragment)
+                .commit();
+
+        mapFragment.getMapAsync(this);
+    }
+
+    /*
+     * Called when the Google Map is ready.
+     */
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        googleMap = map;
+
+        LatLng destinationLatLng = new LatLng(destination.getLatitude(), destination.getLongitude());
+
+        destinationMarker = googleMap.addMarker(
+                new MarkerOptions()
+                        .position(destinationLatLng)
+                        .title(destination.getName())
+        );
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destinationLatLng, 15f));
+
+        try {
+            if (locationHelper.hasLocationPermission()) {
+                googleMap.setMyLocationEnabled(true);
+            }
+        } catch (SecurityException ignored) {
+        }
+
+        // If location already arrived before map was ready, draw immediately
+        if (lastKnownLocation != null) {
+            updateMapMarkers(lastKnownLocation);
+            maybeFetchWalkingRoute(lastKnownLocation);
+        }
     }
 
     /*
@@ -149,6 +222,7 @@ public class WalkSessionActivity extends AppCompatActivity {
             List<String> phones = AppDatabase.getInstance(this)
                     .contactDao()
                     .getAllPhoneNumber(currUserId);
+
             runOnUiThread(() -> {
                 contactPhones = phones;
 
@@ -159,8 +233,10 @@ public class WalkSessionActivity extends AppCompatActivity {
 
         arrivalAlreadyHandled = false;
         walkSessionActive = true;
+        initialCameraFramed = false;
         Date sessionStartTime = new Date();
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
+        btnToggleWalk.setText(getString(R.string.endWalkText));
 
         // Create a new session document in Firestore when the walk starts
         Map<String, Object> session = new HashMap<>();
@@ -190,13 +266,13 @@ public class WalkSessionActivity extends AppCompatActivity {
                         walkSession.setStatus("active");
                         localSessionId = db.walkSessionDao().insert(walkSession);
 
-                        runOnUiThread(() -> {
-                            Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show();
-                        });
+                        runOnUiThread(() ->
+                                Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show()
+                        );
                     }).start();
                 })
                 .addOnFailureListener(e ->
-                    Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         // Start GPS updates
         locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
@@ -275,6 +351,7 @@ public class WalkSessionActivity extends AppCompatActivity {
         walkSessionActive = false;
         locationHelper.stopLocationUpdates();
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session stopped"));
+        btnToggleWalk.setText(getString(R.string.startWalkText));
         handler.removeCallbacks(sendLocationUpdateRunnable);
 
         // Write a final location ping before closing the session
@@ -307,11 +384,10 @@ public class WalkSessionActivity extends AppCompatActivity {
                     session.setStatus(arrived ? "completed" : "stopped");
                     db.walkSessionDao().update(session);
                 }
-                
+
                 runOnUiThread(this::finish);   // finish after update
             }).start();
-        }
-        else {
+        } else {
             finish();
         }
     }
@@ -342,13 +418,22 @@ public class WalkSessionActivity extends AppCompatActivity {
         // Display current GPS location on screen
         tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, lat + ", " + lng));
 
-        float distance = LocationUtility.distanceInMeters(
+        // Keep arrival detection based on direct radius
+        float crowFlyDistance = LocationUtility.distanceInMeters(
                 lat,
                 lng,
                 destination.getLatitude(),
                 destination.getLongitude()
         );
-        tvDistance.setText(getString(R.string.tvDistanceText, distance));
+
+        // Until the route API responds, show the direct distance temporarily
+        tvDistance.setText(getString(R.string.tvDistanceText, crowFlyDistance));
+
+        // Update map markers/camera immediately
+        updateMapMarkers(location);
+
+        // Fetch / refresh best walking route
+        maybeFetchWalkingRoute(location);
 
         // Arrival detection
         if (!arrivalAlreadyHandled &&
@@ -356,6 +441,282 @@ public class WalkSessionActivity extends AppCompatActivity {
             arrivalAlreadyHandled = true;
             onArrivalDetected();
         }
+    }
+
+    /*
+     * Updates the visible map with:
+     * - destination marker
+     * - live user marker
+     */
+    private void updateMapMarkers(Location location) {
+        if (googleMap == null || location == null || destination == null) {
+            return;
+        }
+
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng destinationLatLng = new LatLng(destination.getLatitude(), destination.getLongitude());
+
+        if (destinationMarker == null) {
+            destinationMarker = googleMap.addMarker(
+                    new MarkerOptions()
+                            .position(destinationLatLng)
+                            .title(destination.getName())
+            );
+        }
+
+        if (currentLocationMarker == null) {
+            currentLocationMarker = googleMap.addMarker(
+                    new MarkerOptions()
+                            .position(currentLatLng)
+                            .title("You")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+            );
+        } else {
+            currentLocationMarker.setPosition(currentLatLng);
+        }
+
+        if (!initialCameraFramed) {
+            LatLngBounds bounds = new LatLngBounds.Builder()
+                    .include(currentLatLng)
+                    .include(destinationLatLng)
+                    .build();
+
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 120));
+            initialCameraFramed = true;
+        } else {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f));
+        }
+
+        try {
+            if (locationHelper.hasLocationPermission()) {
+                googleMap.setMyLocationEnabled(true);
+            }
+        } catch (SecurityException ignored) {
+        }
+    }
+
+    /*
+     * Decide when to refresh the walking route.
+     */
+    private void maybeFetchWalkingRoute(Location location) {
+        if (googleMap == null || location == null || destination == null || routeRequestInFlight) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        LatLng currentOrigin = new LatLng(location.getLatitude(), location.getLongitude());
+
+        boolean enoughTimePassed = (now - lastRouteFetchTimeMs) >= ROUTE_REFRESH_INTERVAL_MS;
+        boolean movedEnough = lastRouteOrigin == null ||
+                distanceBetweenLatLng(lastRouteOrigin, currentOrigin) >= ROUTE_REFRESH_MIN_MOVE_METERS;
+
+        if (!enoughTimePassed && !movedEnough) {
+            return;
+        }
+
+        lastRouteFetchTimeMs = now;
+        lastRouteOrigin = currentOrigin;
+        fetchWalkingRouteAsync(currentOrigin,
+                new LatLng(destination.getLatitude(), destination.getLongitude()));
+    }
+
+    /*
+     * Fetch the best walking route from Google Routes API.
+     */
+    private void fetchWalkingRouteAsync(LatLng origin, LatLng destinationLatLng) {
+        routeRequestInFlight = true;
+
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+
+            try {
+                URL url = new URL("https://routes.googleapis.com/directions/v2:computeRoutes");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("X-Goog-Api-Key", BuildConfig.PLACES_API_KEY);
+                connection.setRequestProperty(
+                        "X-Goog-FieldMask",
+                        "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline"
+                );
+                connection.setDoOutput(true);
+
+                JSONObject requestBody = new JSONObject();
+
+                JSONObject originObj = new JSONObject();
+                JSONObject originLocation = new JSONObject();
+                JSONObject originLatLng = new JSONObject();
+                originLatLng.put("latitude", origin.latitude);
+                originLatLng.put("longitude", origin.longitude);
+                originLocation.put("latLng", originLatLng);
+                originObj.put("location", originLocation);
+
+                JSONObject destinationObj = new JSONObject();
+                JSONObject destinationLocation = new JSONObject();
+                JSONObject destinationLatLngObj = new JSONObject();
+                destinationLatLngObj.put("latitude", destinationLatLng.latitude);
+                destinationLatLngObj.put("longitude", destinationLatLng.longitude);
+                destinationLocation.put("latLng", destinationLatLngObj);
+                destinationObj.put("location", destinationLocation);
+
+                requestBody.put("origin", originObj);
+                requestBody.put("destination", destinationObj);
+                requestBody.put("travelMode", "WALK");
+                requestBody.put("languageCode", "en-US");
+                requestBody.put("units", "IMPERIAL");
+                requestBody.put("polylineQuality", "HIGH_QUALITY");
+
+                try (OutputStream os = connection.getOutputStream()) {
+                    os.write(requestBody.toString().getBytes());
+                }
+
+                int responseCode = connection.getResponseCode();
+                BufferedReader reader;
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                } else {
+                    reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                }
+
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+
+                if (responseCode < 200 || responseCode >= 300) {
+                    runOnUiThread(() ->
+                            Toast.makeText(
+                                    WalkSessionActivity.this,
+                                    "Route request failed",
+                                    Toast.LENGTH_SHORT
+                            ).show()
+                    );
+                    return;
+                }
+
+                JSONObject responseJson = new JSONObject(responseBuilder.toString());
+                JSONArray routes = responseJson.optJSONArray("routes");
+                if (routes == null || routes.length() == 0) {
+                    return;
+                }
+
+                JSONObject firstRoute = routes.getJSONObject(0);
+                int distanceMeters = firstRoute.optInt("distanceMeters", -1);
+
+                JSONObject polylineObj = firstRoute.optJSONObject("polyline");
+                if (polylineObj == null) {
+                    return;
+                }
+
+                String encodedPolyline = polylineObj.optString("encodedPolyline", "");
+                if (encodedPolyline.isEmpty()) {
+                    return;
+                }
+
+                List<LatLng> routePoints = decodePolyline(encodedPolyline);
+
+                runOnUiThread(() -> {
+                    drawWalkingRoute(routePoints);
+
+                    if (distanceMeters >= 0) {
+                        tvDistance.setText(getString(R.string.tvDistanceText, (float) distanceMeters));
+                    }
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(
+                                WalkSessionActivity.this,
+                                "Unable to fetch walking route",
+                                Toast.LENGTH_SHORT
+                        ).show()
+                );
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                routeRequestInFlight = false;
+            }
+        }).start();
+    }
+
+    /*
+     * Draw the walking route polyline on the map.
+     */
+    private void drawWalkingRoute(List<LatLng> routePoints) {
+        if (googleMap == null || routePoints == null || routePoints.isEmpty()) {
+            return;
+        }
+
+        if (routeLine != null) {
+            routeLine.remove();
+        }
+
+        routeLine = googleMap.addPolyline(
+                new PolylineOptions()
+                        .addAll(routePoints)
+                        .width(10f)
+                        .geodesic(true)
+        );
+    }
+
+    /*
+     * Decode an encoded polyline into LatLng points.
+     */
+    private List<LatLng> decodePolyline(String encoded) {
+        List<LatLng> poly = new ArrayList<>();
+        int index = 0;
+        int len = encoded.length();
+        int lat = 0;
+        int lng = 0;
+
+        while (index < len) {
+            int b;
+            int shift = 0;
+            int result = 0;
+
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+
+            int dlat = ((result & 1) != 0) ? ~(result >> 1) : (result >> 1);
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+
+            int dlng = ((result & 1) != 0) ? ~(result >> 1) : (result >> 1);
+            lng += dlng;
+
+            LatLng point = new LatLng(lat / 1E5, lng / 1E5);
+            poly.add(point);
+        }
+
+        return poly;
+    }
+
+    /*
+     * Distance helper for deciding when to refresh route.
+     */
+    private float distanceBetweenLatLng(LatLng a, LatLng b) {
+        float[] results = new float[1];
+        Location.distanceBetween(
+                a.latitude, a.longitude,
+                b.latitude, b.longitude,
+                results
+        );
+        return results[0];
     }
 
     private void updateSessionStartLocation(){
@@ -411,7 +772,6 @@ public class WalkSessionActivity extends AppCompatActivity {
     public void onToggleStartStop(View view) {
         if (!walkSessionActive) {
             startWalkSession();
-            btnToggleWalk.setText(getString(R.string.endWalkText));
         } else {
             stopWalkSession(false);
         }
