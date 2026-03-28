@@ -7,7 +7,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -190,9 +189,9 @@ public class WalkSessionActivity extends AppCompatActivity {
                         walkSession.setStatus("active");
                         localSessionId = db.walkSessionDao().insert(walkSession);
 
-                        runOnUiThread(() -> {
-                            Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show();
-                        });
+                        runOnUiThread(() ->
+                            Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show()
+                        );
                     }).start();
                 })
                 .addOnFailureListener(e ->
@@ -307,7 +306,6 @@ public class WalkSessionActivity extends AppCompatActivity {
                     session.setStatus(arrived ? "completed" : "stopped");
                     db.walkSessionDao().update(session);
                 }
-                
                 runOnUiThread(this::finish);   // finish after update
             }).start();
         }
