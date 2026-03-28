@@ -12,7 +12,6 @@ import android.content.Context;
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ContactDao contactDao();
     public abstract WalkSessionDao walkSessionDao();
-
     public abstract DatabaseDao databaseDao();
 
     private static volatile AppDatabase INSTANCE;
@@ -21,8 +20,12 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    AppDatabase.class, "msu_companion_db")
+                    INSTANCE = Room.databaseBuilder(
+                                    context.getApplicationContext(),
+                                    AppDatabase.class,
+                                    "msu_companion_db"
+                            )
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }
