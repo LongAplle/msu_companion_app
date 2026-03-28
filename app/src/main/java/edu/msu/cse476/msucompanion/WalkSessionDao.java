@@ -15,6 +15,9 @@ public interface WalkSessionDao {
     @Update
     void update(WalkSession session);
 
+    @Query("SELECT * FROM walk_sessions WHERE id = :id")
+    WalkSession getSessionById(long id);
+
     @Query("SELECT * FROM walk_sessions WHERE userId = :userId ORDER BY startTime DESC")
     List<WalkSession> getSessionsForUser(String userId);
 }
