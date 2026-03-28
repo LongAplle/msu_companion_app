@@ -2,7 +2,6 @@
 ## Remote database:
 - [ ] Fetch User Data from Server (userId, full name, username, email) (LoginActivity)
 - [ ] Populate local Contact and Session History (LoginActivity)
-- [ ] Add walk session to remote database (sectionId, userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status) (WalkSessionActivity)
 
 ## GPS:
 - [ ] Implement a live map feature (WalkSessionActivity, walk_session layout)
@@ -18,4 +17,5 @@
 - [ ] Add walk session to local database (userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status) (WalkSessionActivity)
 
 - [ ] Implement foreground service for the app
+- [ ] Implement returning to current active walk session when returning to the app
 
