@@ -53,7 +53,6 @@ public class ContactListActivity extends AppCompatActivity {
 
     private void loadContacts() {
         new Thread(() -> {
-            // Convert int userId to String for DAO
             List<Contact> contacts = db.contactDao().getContactsForUser(currUserId);
             runOnUiThread(() -> adapter.updateList(contacts));
         }).start();
@@ -72,7 +71,7 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.contactRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ContactAdapter(new ArrayList<>(), contact -> {
             Intent intent = new Intent(ContactListActivity.this, EditOrDeleteContactActivity.class);

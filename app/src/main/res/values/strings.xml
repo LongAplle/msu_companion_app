@@ -31,16 +31,14 @@
     <string name="sessionTitle">Start a new session</string>
     <string name="finalDest">Final Destination</string>
     <string name="destination_hint">e.g., Shaw Hall, 1855 Place</string>
-    <string name="buddy_prompt">Contact your buddy!</string>
-    <string name="buddy_name_hint">Buddy name</string>
-    <string name="buddy_phone_hint">Buddy phone number</string>
     <string name="GoBack">Go back</string>
     <string name="fullNameHint">First and Last Name</string>
     <string name="spartan_head_logo">Spartan head logo</string>
-    <string name="pastSessions">Past Sessions</string>
-    <string name="TempDiscription">Destination, Start Time, End Time</string>
     <string name="cancelButton">Cancel Session</string>
     <string name="sessionStatus">Status:</string>
     <string name="msu_companion_logo">MSU Companion logo</string>
+
+    <string name="destinationNamePlaceholder">Destination Name</string>
+    <string name="startTimePlaceholder">Start Time</string>
 
 </resources>

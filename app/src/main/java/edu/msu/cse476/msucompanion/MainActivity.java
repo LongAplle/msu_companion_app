@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onViewSessionHistory(View view) {
-        // TODO: Add view session history functionality
+        Intent intent = new Intent(this, SessionHistoryActivity.class);
+        startActivity(intent);
     }
 
     public void onStartSession(View view) {
