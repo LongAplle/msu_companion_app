@@ -19,7 +19,7 @@ import java.util.List;
 public class ContactListActivity extends AppCompatActivity {
     private ContactAdapter adapter;
     private AppDatabase db;
-    private int currUserIdLocal;
+    private String currUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +28,8 @@ public class ContactListActivity extends AppCompatActivity {
 
         // Get current user from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        currUserIdLocal = prefs.getInt("userIdLocal", 0);
-        if (currUserIdLocal == 0) {
-            // No user logged in → go to LoginActivity
-            startActivity(new Intent(this, LoginActivity.class));
+        currUserId = prefs.getString("userId", null);
+        if (currUserId == null) {
             finish();
             return;
         }
@@ -56,14 +54,14 @@ public class ContactListActivity extends AppCompatActivity {
     private void loadContacts() {
         new Thread(() -> {
             // Convert int userId to String for DAO
-            List<Contact> contacts = db.contactDao().getContactsForUser(currUserIdLocal);
+            List<Contact> contacts = db.contactDao().getContactsForUser(currUserId);
             runOnUiThread(() -> adapter.updateList(contacts));
         }).start();
     }
 
     private void searchContacts(String query) {
         new Thread(() -> {
-            List<Contact> contacts = db.contactDao().searchContacts(currUserIdLocal, query);
+            List<Contact> contacts = db.contactDao().searchContacts(currUserId, query);
             runOnUiThread(() -> adapter.updateList(contacts));
         }).start();
     }

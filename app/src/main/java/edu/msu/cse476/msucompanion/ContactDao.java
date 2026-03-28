@@ -19,18 +19,15 @@ public interface ContactDao {
     @Delete
     void delete(Contact contact);
 
-    @Query("DELETE FROM contacts WHERE userId = :userId")
-    void deleteContactsForUser(String userId);
-
     @Query("SELECT * FROM contacts WHERE id = :id")
-    Contact getContactById(int id);
+    Contact getContactById(long id);
 
     @Query("SELECT * FROM contacts WHERE userId = :userId")
-    List<Contact> getContactsForUser(int userId);
+    List<Contact> getContactsForUser(String userId);
 
-    @Query("SELECT * FROM contacts WHERE userId = :userId AND phoneNumber LIKE '%' || :query || '%' OR name LIKE '%' || :query || '%'")
-    List<Contact> searchContacts(int userId, String query);
+    @Query("SELECT * FROM contacts WHERE userId = :userId AND (phoneNumber LIKE '%' || :query || '%' OR name LIKE '%' || :query || '%')")
+    List<Contact> searchContacts(String userId, String query);
 
     @Query("SELECT phoneNumber FROM contacts WHERE userId = :userId")
-    List<String> getAllPhoneNumber(int userId);
+    List<String> getAllPhoneNumber(String userId);
 }

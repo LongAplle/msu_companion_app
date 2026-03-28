@@ -55,9 +55,6 @@ public class WalkSessionActivity extends AppCompatActivity {
     // Firestore session document ID — used to update the session on end
     private String currentSessionId;
 
-    // Local user ID
-    private int currUserIdLocal;
-
 
     // Firestore instance for saving session and ping data
     private FirebaseFirestore db;
@@ -82,7 +79,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         // Note: userId is a String (Firestore auto-generated ID)
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         currUserId = prefs.getString("userId", null);
-        currUserIdLocal = prefs.getInt("userIdLocal", 0);
         if (currUserId == null) {
             finish();
             return;
@@ -143,7 +139,7 @@ public class WalkSessionActivity extends AppCompatActivity {
         new Thread(() -> {
             List<String> phones = AppDatabase.getInstance(this)
                     .contactDao()
-                    .getAllPhoneNumber(currUserIdLocal);
+                    .getAllPhoneNumber(currUserId);
             runOnUiThread(() -> {
                 contactPhones = phones;
 

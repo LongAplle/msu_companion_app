@@ -19,30 +19,24 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
     private AppDatabase db;
     private FirebaseFirestore firestoreDb;
 
-    int contactId;
-
-    private String currUserIdFirestore;  // Firestore string ID
-    private int currUserIdLocal;         // Local Room int ID
+    long contactId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_or_delete_contact);
 
-        // Get both user IDs from SharedPreferences
-        // Firestore uses a String ID, Room uses an int ID
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        currUserIdFirestore = prefs.getString("userId", null);
-        currUserIdLocal = prefs.getInt("userIdLocal", 0);
+        String currUserId = prefs.getString("userId", null);  // Firestore string ID
 
-        if (currUserIdFirestore == null) {
+        if (currUserId == null) {
             finish();
             return;
         }
 
         // Get contact data passed from the previous activity
         Intent intent = getIntent();
-        contactId = intent.getIntExtra("contact_id", -1);
+        contactId = intent.getLongExtra("contact_id", -1);
         String name = intent.getStringExtra("contact_name");
         String phone = intent.getStringExtra("contact_phone");
 
@@ -83,7 +77,6 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                 db.contactDao().update(existing);
 
                 // Mirror the update to Firestore using contactId as the document ID
-                // Only updating name and phone, preserving userId and other fields
                 Map<String, Object> updates = new HashMap<>();
                 updates.put("name", newName);
                 updates.put("phone", newPhone);
@@ -115,7 +108,7 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
             contact.setId(contactId);
             db.contactDao().delete(contact);
 
-            // Mirror the delete to Firestore using contactId as the document ID
+            // Mirror delete to Firestore using contactId as the document ID
             firestoreDb.collection("contacts")
                     .document(String.valueOf(contactId))
                     .delete()

@@ -16,8 +16,7 @@ import java.util.Map;
 
 public class AddContactActivity extends AppCompatActivity {
     private AppDatabase db;
-    private String currUserIdFirestore;  // Firestore string ID
-    private int currUserIdLocal;         // Local Room int ID
+    private String currUserId;  // Firestore string ID
 
     private FirebaseFirestore firestoreDb;
 
@@ -26,13 +25,10 @@ public class AddContactActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_contact);
 
-        // Get both user IDs from SharedPreferences
-        // Firestore uses a String ID, Room uses an int ID
+        // Get current user from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        currUserIdFirestore = prefs.getString("userId", null);
-        currUserIdLocal = prefs.getInt("userIdLocal", 0);
-
-        if (currUserIdFirestore == null) {
+        currUserId = prefs.getString("userId", null);
+        if (currUserId == null) {
             finish();
             return;
         }
@@ -55,7 +51,7 @@ public class AddContactActivity extends AppCompatActivity {
         }
 
         // Use int ID for Room local database
-        Contact contact = new Contact(currUserIdLocal, name, phone);
+        Contact contact = new Contact(currUserId, name, phone);
         new Thread(() -> {
             // Save to local Room database first
             long rowId = db.contactDao().insert(contact);
@@ -65,7 +61,7 @@ public class AddContactActivity extends AppCompatActivity {
             // Use Firestore string ID for remote database
             Map<String, Object> contactData = new HashMap<>();
             contactData.put("contactId", contactId);
-            contactData.put("userId", currUserIdFirestore);
+            contactData.put("userId", currUserId);
             contactData.put("name", name);
             contactData.put("phone", phone);
 

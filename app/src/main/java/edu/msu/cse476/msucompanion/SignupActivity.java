@@ -67,8 +67,7 @@ public class SignupActivity extends AppCompatActivity {
                                     // Save to SharedPreferences after both Auth and Firestore succeed
                                     SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
                                     SharedPreferences.Editor editor = prefs.edit();
-                                    editor.putString("userId", uid); //firestore string ID
-                                    editor.putInt("userIdLocal", 1); // Local Room int ID - hardcoded bc we assume 1 device per user
+                                    editor.putString("userId", uid); // firestore string ID
                                     editor.putString("full_name", fullName);
                                     editor.putString("username", username);
                                     editor.putString("email", email);

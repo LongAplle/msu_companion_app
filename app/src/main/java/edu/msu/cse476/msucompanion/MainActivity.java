@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
@@ -66,8 +69,11 @@ public class MainActivity extends AppCompatActivity {
         // Clear Room data for the current user
         String currUserId = prefs.getString("userId", null);
         if (currUserId != null) {
-            new Thread(() -> AppDatabase.getInstance(this).contactDao()
-                    .deleteContactsForUser(currUserId)).start();
+            new Thread(() -> {
+                AppDatabase db = AppDatabase.getInstance(this);
+                db.clearAllTables();
+                db.databaseDao().resetSequence();
+            }).start();
         }
 
         // Clear stored credentials
