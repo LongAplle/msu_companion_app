@@ -59,9 +59,10 @@ public class AddContactActivity extends AppCompatActivity {
                 .add(contactData)
                 .addOnSuccessListener(documentReference -> {
                     String remoteId = documentReference.getId();
-                    Contact contact = new Contact(remoteId, currUserId, name, phone);
 
+                    // Add to local Room database
                     new Thread(() -> {
+                        Contact contact = new Contact(remoteId, currUserId, name, phone);
                         db.contactDao().insert(contact);
                         runOnUiThread(() -> {
                             Toast.makeText(AddContactActivity.this, "Contact saved", Toast.LENGTH_SHORT).show();
