@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         String userId = prefs.getString("userId", null);
         String email = prefs.getString("email", null);
         String fullName = prefs.getString("full_name", null);
+        String username = prefs.getString("username", null);
 
         if (userId == null) {
             // No user logged in → go to LoginActivity
@@ -35,7 +36,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         String displayName;
-        if (fullName != null && !fullName.isEmpty()) {
+        if (username != null && !username.isEmpty()) {
+            displayName = username;
+        } else if (fullName != null && !fullName.isEmpty()) {
             displayName = fullName;
         } else if (email != null && !email.isEmpty()) {
             displayName = email;
