@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -52,12 +53,16 @@ public class WalkSessionActivity extends AppCompatActivity {
     // Remote user ID
     private String currUserId;
 
-    // Firestore session document ID — used to update the session on end
+    // Local Room database session ID
+    private long localSessionId = -1;
+
+    // Firestore session document ID
     private String currentSessionId;
 
-
+    // App local database
+    private AppDatabase db;
     // Firestore instance for saving session and ping data
-    private FirebaseFirestore db;
+    private FirebaseFirestore firestoreDb;
 
     // Handler for periodic location pings to Firestore
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -69,6 +74,9 @@ public class WalkSessionActivity extends AppCompatActivity {
 
     // Session start location
     private Location startLocation;
+    // Flag for updating the start location
+    private boolean startLocationUpdated = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +92,9 @@ public class WalkSessionActivity extends AppCompatActivity {
             return;
         }
 
-        // Initialize Firestore instance
-        db = FirebaseFirestore.getInstance();
+        // Initialize database
+        db = AppDatabase.getInstance(this);
+        firestoreDb = FirebaseFirestore.getInstance();
 
         // Initialize UI components
         TextView tvDestination = findViewById(R.id.tvDestination);
@@ -163,16 +172,28 @@ public class WalkSessionActivity extends AppCompatActivity {
         session.put("endTime", null);
         session.put("status", "active");
 
-        db.collection("sessions")
+        firestoreDb.collection("sessions")
                 .add(session)
                 .addOnSuccessListener(documentReference -> {
                     // Save the session ID so we can update it when the walk ends
                     currentSessionId = documentReference.getId();
 
-                    // Update start location if it is available
-                    if (startLocation != null) {
-                        updateSessionStartLocation();
-                    }
+                    // Add Session to local Room database
+                    new Thread(() -> {
+                        WalkSession walkSession = new WalkSession();
+                        walkSession.setRemoteId(currentSessionId);
+                        walkSession.setUserId(currUserId);
+                        walkSession.setStartTime(sessionStartTime);
+                        walkSession.setDestinationName(destination.getName());
+                        walkSession.setDestinationLat(destination.getLatitude());
+                        walkSession.setDestinationLng(destination.getLongitude());
+                        walkSession.setStatus("active");
+                        localSessionId = db.walkSessionDao().insert(walkSession);
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show();
+                        });
+                    }).start();
                 })
                 .addOnFailureListener(e ->
                     Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -228,7 +249,7 @@ public class WalkSessionActivity extends AppCompatActivity {
         ping.put("timestamp", new Date());
 
         // Pings are stored as a sub-collection under the session document
-        db.collection("sessions")
+        firestoreDb.collection("sessions")
                 .document(currentSessionId)
                 .collection("pings")
                 .add(ping);
@@ -240,6 +261,15 @@ public class WalkSessionActivity extends AppCompatActivity {
     private void stopWalkSession(boolean arrived) {
         if (!walkSessionActive) {
             return;
+        }
+
+        if (arrived) {
+            sendNotification("I have arrived at " + destination.getName() + ".");
+        } else if (lastKnownLocation != null) {
+            double lat = lastKnownLocation.getLatitude();
+            double lng = lastKnownLocation.getLongitude();
+            String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
+            sendNotification("I stopped the walk. My final location: " + mapsLink);
         }
 
         walkSessionActive = false;
@@ -255,30 +285,35 @@ public class WalkSessionActivity extends AppCompatActivity {
             );
         }
 
-        // TODO: Add walk session to local database (userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status)
+        Date endTime = new Date();
 
         // Update the session document in Firestore with end time and final status
         if (currentSessionId != null) {
             Map<String, Object> updates = new HashMap<>();
-            updates.put("endTime", new Date());
+            updates.put("endTime", endTime);
             updates.put("status", arrived ? "completed" : "stopped");
 
-            db.collection("sessions")
+            firestoreDb.collection("sessions")
                     .document(currentSessionId)
                     .update(updates);
         }
 
-        if (arrived) {
-            sendNotification("I have arrived at " + destination.getName() + ".");
-        } else if (lastKnownLocation != null) {
-            double lat = lastKnownLocation.getLatitude();
-            double lng = lastKnownLocation.getLongitude();
-            String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-            sendNotification("I stopped the walk. My final location: " + mapsLink);
+        // Update the session in local Room database
+        if (localSessionId != -1) {
+            new Thread(() -> {
+                WalkSession session = db.walkSessionDao().getSessionById(localSessionId);
+                if (session != null) {
+                    session.setEndTime(endTime);
+                    session.setStatus(arrived ? "completed" : "stopped");
+                    db.walkSessionDao().update(session);
+                }
+                
+                runOnUiThread(this::finish);   // finish after update
+            }).start();
         }
-
-        // Close the activity so a new session must be started from the destination picker
-        finish();
+        else {
+            finish();
+        }
     }
 
     /*
@@ -294,10 +329,10 @@ public class WalkSessionActivity extends AppCompatActivity {
         // Initialize start location if not yet
         if (startLocation == null) {
             startLocation = lastKnownLocation;
+        }
 
-            if (currentSessionId != null) {
-                updateSessionStartLocation();
-            }
+        if (!startLocationUpdated) {
+            updateSessionStartLocation();
         }
 
         // Retrieve the user's current coordinates
@@ -324,19 +359,31 @@ public class WalkSessionActivity extends AppCompatActivity {
     }
 
     private void updateSessionStartLocation(){
-        if (currentSessionId == null || startLocation == null) return;
+        if (currentSessionId == null || localSessionId == -1 || startLocation == null) return;
+        startLocationUpdated = true;
 
         double startLat = startLocation.getLatitude();
         double startLng = startLocation.getLongitude();
 
+        // Firestore update
         Map<String, Object> updates = new HashMap<>();
         updates.put("startLat", startLat);
         updates.put("startLng", startLng);
-        db.collection("sessions")
+        firestoreDb.collection("sessions")
                 .document(currentSessionId)
                 .update(updates)
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to update start location", Toast.LENGTH_SHORT).show());
+
+        // Local Room update
+        new Thread(() -> {
+            WalkSession session = db.walkSessionDao().getSessionById(localSessionId);
+            if (session != null) {
+                session.setStartLat(startLat);
+                session.setStartLng(startLng);
+                db.walkSessionDao().update(session);
+            }
+        }).start();
     }
 
     /*

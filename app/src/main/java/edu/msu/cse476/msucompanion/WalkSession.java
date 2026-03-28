@@ -7,7 +7,8 @@ import java.util.Date;
 @Entity(tableName = "walk_sessions")
 public class WalkSession {
     @PrimaryKey(autoGenerate = true)
-    public long id;                 // local ID of walk session
+    public long id;                 // local ID of walk session (will reset once logged out)
+    public String remoteId;          // Firestore document ID
     public String userId;             // Firestore user ID
     public Date startTime;
     public Date endTime;           // nullable
@@ -23,6 +24,9 @@ public class WalkSession {
     // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
+
+    public String getRemoteId() { return remoteId; }
+    public void setRemoteId(String remoteId) { this.remoteId = remoteId; }
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }

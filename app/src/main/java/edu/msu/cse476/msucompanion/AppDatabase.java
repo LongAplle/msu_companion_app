@@ -7,7 +7,7 @@ import androidx.room.TypeConverters;
 
 import android.content.Context;
 
-@Database(entities = {Contact.class, WalkSession.class}, version = 3, exportSchema = false)
+@Database(entities = {Contact.class, WalkSession.class}, version = 4, exportSchema = false)
 @TypeConverters({DateLongConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ContactDao contactDao();
