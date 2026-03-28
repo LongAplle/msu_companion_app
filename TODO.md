@@ -14,7 +14,6 @@
 
 ## Other:
 - [ ] Add view session history functionality (Main Acitivity)
-- [ ] Add walk session to local database (userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status) (WalkSessionActivity)
 
 - [ ] Implement foreground service for the app
 - [ ] Implement returning to current active walk session when returning to the app
