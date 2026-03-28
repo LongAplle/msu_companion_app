@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
     <!-- GPS permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Firebase permissions -->
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- Internet permission for Firebase / Maps / Places -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Firebase permissions -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Internet permission for Firebase / Maps / Places -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -21,7 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MSUCompanion">
-
+        <activity
+            android:name=".SessionHistoryActivity"
+            android:exported="false" />
         <activity
             android:name=".EditOrDeleteContactActivity"
             android:exported="false" />
@@ -31,14 +29,12 @@
         <activity
             android:name=".ContactListActivity"
             android:exported="false" />
-
         <activity
             android:name=".SignupActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
-
         <activity
             android:name=".MapPickerActivity"
             android:exported="false" />
@@ -48,12 +44,12 @@
         <activity
             android:name=".SessionActivity"
             android:exported="false" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -61,7 +57,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
-
     </application>
 
 </manifest>
