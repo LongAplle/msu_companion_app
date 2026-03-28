@@ -50,7 +50,6 @@ public class AddContactActivity extends AppCompatActivity {
             return;
         }
 
-        // Use int ID for Room local database
         Contact contact = new Contact(currUserId, name, phone);
         new Thread(() -> {
             // Save to local Room database first
@@ -58,7 +57,6 @@ public class AddContactActivity extends AppCompatActivity {
             String contactId = String.valueOf(rowId);
 
             // Build contact data map for Firestore
-            // Use Firestore string ID for remote database
             Map<String, Object> contactData = new HashMap<>();
             contactData.put("contactId", contactId);
             contactData.put("userId", currUserId);
@@ -66,7 +64,6 @@ public class AddContactActivity extends AppCompatActivity {
             contactData.put("phone", phone);
 
             // Mirror contact to Firestore using Room row ID as document ID
-            // so both databases stay in sync with the same identifier
             firestoreDb.collection("contacts")
                     .document(contactId)
                     .set(contactData)
