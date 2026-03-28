@@ -34,6 +34,10 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
             return;
         }
 
+        // Initialize local Room database and Firestore instance
+        db = AppDatabase.getInstance(this);
+        firestoreDb = FirebaseFirestore.getInstance();
+
         // Get contact data passed from the previous activity
         Intent intent = getIntent();
         contactId = intent.getLongExtra("contact_id", -1);
@@ -51,10 +55,6 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
         EditText editPhone = findViewById(R.id.editPhone);
         editName.setText(name);
         editPhone.setText(phone);
-
-        // Initialize local Room database and Firestore instance
-        db = AppDatabase.getInstance(this);
-        firestoreDb = FirebaseFirestore.getInstance();
     }
 
     public void onSave(View view) {
@@ -69,26 +69,30 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
         }
 
         new Thread(() -> {
-            // Update contact in local Room database first
-            Contact existing = db.contactDao().getContactById(contactId);
-            if (existing != null) {
-                existing.setName(newName);
-                existing.setPhoneNumber(newPhone);
-                db.contactDao().update(existing);
+            Contact currentContact = db.contactDao().getContactById(contactId);
 
-                // Mirror the update to Firestore using contactId as the document ID
+            if (currentContact != null) {
+                // Update contact in Firestore
+                String remoteId = currentContact.getRemoteId();
                 Map<String, Object> updates = new HashMap<>();
                 updates.put("name", newName);
                 updates.put("phone", newPhone);
 
                 firestoreDb.collection("contacts")
-                        .document(String.valueOf(contactId))
+                        .document(remoteId)
                         .update(updates)
                         .addOnSuccessListener(unused -> {
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, "Contact updated", Toast.LENGTH_SHORT).show();
-                                finish();
-                            });
+                            // Update contact in local Room database
+                            new Thread(() -> {
+                                currentContact.setName(newName);
+                                currentContact.setPhoneNumber(newPhone);
+                                db.contactDao().update(currentContact);
+
+                                runOnUiThread(() -> {
+                                    Toast.makeText(this, "Contact updated", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                });
+                            }).start();
                         })
                         .addOnFailureListener(e -> {
                             runOnUiThread(() -> {
@@ -103,26 +107,31 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
 
     public void onDelete(View view) {
         new Thread(() -> {
-            // Delete contact from local Room database
-            Contact contact = new Contact();
-            contact.setId(contactId);
-            db.contactDao().delete(contact);
+            Contact currentContact = db.contactDao().getContactById(contactId);
 
-            // Mirror delete to Firestore using contactId as the document ID
-            firestoreDb.collection("contacts")
-                    .document(String.valueOf(contactId))
-                    .delete()
-                    .addOnSuccessListener(unused -> {
-                        runOnUiThread(() -> {
-                            Toast.makeText(this, "Contact deleted", Toast.LENGTH_SHORT).show();
-                            finish();
+            if (currentContact != null) {
+                // Delete contact from Firestore
+                String remoteId = currentContact.getRemoteId();
+                firestoreDb.collection("contacts")
+                        .document(remoteId)
+                        .delete()
+                        .addOnSuccessListener(unused -> {
+                            // Delete contact from local Room database
+                            new Thread(() -> {
+                                db.contactDao().delete(currentContact);
+
+                                runOnUiThread(() -> {
+                                    Toast.makeText(this, "Contact deleted", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                });
+                            }).start();
+                        })
+                        .addOnFailureListener(e -> {
+                            runOnUiThread(() -> {
+                                Toast.makeText(this, "Failed to delete contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                         });
-                    })
-                    .addOnFailureListener(e -> {
-                        runOnUiThread(() -> {
-                            Toast.makeText(this, "Failed to delete contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-                    });
+            }
         }).start();
     }
 }

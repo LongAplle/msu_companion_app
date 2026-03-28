@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "contacts")
 public class Contact {
     @PrimaryKey(autoGenerate = true)
-    public long id;  // local ID of contact
+    public long id;  // local ID of contact (will reset once logged out)
+    private String remoteId;    // firestore document ID
     public String userId;  // firestore user ID
 
     public String name;
@@ -14,7 +15,8 @@ public class Contact {
 
     public Contact() {}
 
-    public Contact(String userId, String name, String phoneNumber) {
+    public Contact(String remoteId, String userId, String name, String phoneNumber) {
+        this.remoteId = remoteId;
         this.userId = userId;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -23,6 +25,9 @@ public class Contact {
     // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
+
+    public String getRemoteId() { return remoteId; }
+    public void setRemoteId(String remoteId) { this.remoteId = remoteId; }
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }

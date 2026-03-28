@@ -41,7 +41,6 @@ public class AddContactActivity extends AppCompatActivity {
     public void onSave(View view) {
         EditText editName = findViewById(R.id.editName);
         EditText editPhone = findViewById(R.id.editPhone);
-
         String name = editName.getText().toString().trim();
         String phone = editPhone.getText().toString().trim();
 
@@ -50,34 +49,29 @@ public class AddContactActivity extends AppCompatActivity {
             return;
         }
 
-        Contact contact = new Contact(currUserId, name, phone);
-        new Thread(() -> {
-            // Save to local Room database first
-            long rowId = db.contactDao().insert(contact);
-            String contactId = String.valueOf(rowId);
+        Map<String, Object> contactData = new HashMap<>();
+        contactData.put("userId", currUserId);
+        contactData.put("name", name);
+        contactData.put("phone", phone);
 
-            // Build contact data map for Firestore
-            Map<String, Object> contactData = new HashMap<>();
-            contactData.put("contactId", contactId);
-            contactData.put("userId", currUserId);
-            contactData.put("name", name);
-            contactData.put("phone", phone);
+        // Create Firestore document and let it generate the remote ID
+        firestoreDb.collection("contacts")
+                .add(contactData)
+                .addOnSuccessListener(documentReference -> {
+                    String remoteId = documentReference.getId();
+                    Contact contact = new Contact(remoteId, currUserId, name, phone);
 
-            // Mirror contact to Firestore using Room row ID as document ID
-            firestoreDb.collection("contacts")
-                    .document(contactId)
-                    .set(contactData)
-                    .addOnSuccessListener(unused -> {
+                    new Thread(() -> {
+                        db.contactDao().insert(contact);
                         runOnUiThread(() -> {
                             Toast.makeText(AddContactActivity.this, "Contact saved", Toast.LENGTH_SHORT).show();
                             finish();
                         });
-                    })
-                    .addOnFailureListener(e -> {
-                        runOnUiThread(() -> {
-                            Toast.makeText(AddContactActivity.this, "Failed to save contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-                    });
-        }).start();
+                    }).start();
+                })
+                .addOnFailureListener(e ->
+                    runOnUiThread(() ->
+                            Toast.makeText(AddContactActivity.this, "Failed to save contact: " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                );
     }
 }
