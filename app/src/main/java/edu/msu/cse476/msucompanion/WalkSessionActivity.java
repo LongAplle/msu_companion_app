@@ -70,8 +70,7 @@ public class WalkSessionActivity extends AppCompatActivity {
     // All trusted contact phone numbers (to be fetched at start)
     private List<String> contactPhones = new ArrayList<>();
 
-    // Session start time and start location
-    private Date sessionStartTime;
+    // Session start location
     private Location startLocation;
 
     @Override
@@ -129,6 +128,11 @@ public class WalkSessionActivity extends AppCompatActivity {
      * If location permission is not granted, it requests permission first.
      */
     private void startWalkSession() {
+        // Guard against starting an already active session
+        if (walkSessionActive) {
+            return;
+        }
+
         // Check if the app has location permission
         if (!locationHelper.hasLocationPermission()) {
             locationHelper.requestLocationPermission(this);
@@ -150,11 +154,10 @@ public class WalkSessionActivity extends AppCompatActivity {
 
         arrivalAlreadyHandled = false;
         walkSessionActive = true;
-        sessionStartTime = new Date();
+        Date sessionStartTime = new Date();
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
 
         // Create a new session document in Firestore when the walk starts
-        // Stores userId, destination info, start time and status
         Map<String, Object> session = new HashMap<>();
         session.put("userId", currUserId);
         session.put("destinationName", destination.getName());
@@ -169,10 +172,14 @@ public class WalkSessionActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentReference -> {
                     // Save the session ID so we can update it when the walk ends
                     currentSessionId = documentReference.getId();
+
+                    // Update start location if it is available
+                    if (startLocation != null) {
+                        updateSessionStartLocation();
+                    }
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                    Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         // Start GPS updates
         locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
@@ -225,7 +232,6 @@ public class WalkSessionActivity extends AppCompatActivity {
         ping.put("timestamp", new Date());
 
         // Pings are stored as a sub-collection under the session document
-        // structure: sessions/{sessionId}/pings/{pingId}
         db.collection("sessions")
                 .document(currentSessionId)
                 .collection("pings")
@@ -253,7 +259,7 @@ public class WalkSessionActivity extends AppCompatActivity {
             );
         }
 
-        // TODO: Add walk session to local database (userId, startTime, endTime, destinationName, destinationLat, destinationLng, status)
+        // TODO: Add walk session to local database (userId, startTime, endTime, startLat, startLng, destinationName, destinationLat, destinationLng, status)
 
         // Update the session document in Firestore with end time and final status
         if (currentSessionId != null) {
@@ -289,6 +295,15 @@ public class WalkSessionActivity extends AppCompatActivity {
         }
         lastKnownLocation = location;
 
+        // Initialize start location if not yet
+        if (startLocation == null) {
+            startLocation = lastKnownLocation;
+
+            if (currentSessionId != null) {
+                updateSessionStartLocation();
+            }
+        }
+
         // Retrieve the user's current coordinates
         double lat = location.getLatitude();
         double lng = location.getLongitude();
@@ -310,6 +325,22 @@ public class WalkSessionActivity extends AppCompatActivity {
             arrivalAlreadyHandled = true;
             onArrivalDetected();
         }
+    }
+
+    private void updateSessionStartLocation(){
+        if (currentSessionId == null || startLocation == null) return;
+
+        double startLat = startLocation.getLatitude();
+        double startLng = startLocation.getLongitude();
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("startLat", startLat);
+        updates.put("startLng", startLng);
+        db.collection("sessions")
+                .document(currentSessionId)
+                .update(updates)
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to update start location", Toast.LENGTH_SHORT).show());
     }
 
     /*
