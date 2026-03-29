@@ -4,7 +4,7 @@
 - [ ] Populate local Contact and Session History (LoginActivity)
 
 ## GPS:
-- [ ] Implement a live map feature (WalkSessionActivity, walk_session layout)
+- [DONE] Implement a live map feature (WalkSessionActivity, walk_session layout)
 
 ## SMS:
 - [ ] Send SMS message to all trusted contacts (WalkSessionActivity)
