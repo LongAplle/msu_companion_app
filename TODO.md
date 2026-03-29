@@ -3,9 +3,6 @@
 - [ ] Fetch User Data from Server (userId, full name, username, email) (LoginActivity)
 - [ ] Populate local Contact and Session History (LoginActivity)
 
-## GPS:
-- [DONE] Implement a live map feature (WalkSessionActivity, walk_session layout)
-
 ## SMS:
 - [ ] Send SMS message to all trusted contacts (WalkSessionActivity)
 
