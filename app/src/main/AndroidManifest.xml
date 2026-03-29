@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MSUCompanion">
         <activity
+            android:name=".ViewWalkSession"
+            android:exported="false" />
+        <activity
             android:name=".SessionHistoryActivity"
             android:exported="false" />
         <activity

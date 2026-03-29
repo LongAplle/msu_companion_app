@@ -1,9 +1,9 @@
 package edu.msu.cse476.msucompanion;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,9 +56,9 @@ public class SessionHistoryActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.sessionRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SessionHistoryAdapter(new ArrayList<>(), session -> {
-            // TODO: Set up view Session activity
-
-            Log.i("SessionHistoryActivity", "Contact clicked: " + session.getDestinationName());
+            Intent intent = new Intent(SessionHistoryActivity.this, ViewWalkSession.class);
+            intent.putExtra("session_id", session.getId());
+            startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
     }

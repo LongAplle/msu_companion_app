@@ -14,7 +14,6 @@ import java.util.Locale;
 
 public class SessionHistoryAdapter extends RecyclerView.Adapter<SessionHistoryAdapter.ViewHolder>{
     private List<WalkSession> sessions;
-
     private final SessionHistoryAdapter.OnItemClickListener listener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -53,7 +52,7 @@ public class SessionHistoryAdapter extends RecyclerView.Adapter<SessionHistoryAd
         // Format the start time text
         Date startTime = session.getStartTime();
         if (startTime != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("E HH:mm MM-dd-yyyy", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("E HH:mm MM/dd/yyyy", Locale.getDefault());
             String formattedStartTime = sdf.format(startTime);
             holder.startTime.setText(formattedStartTime);
         }
@@ -62,6 +61,9 @@ public class SessionHistoryAdapter extends RecyclerView.Adapter<SessionHistoryAd
         String status = session.getStatus();
         String statusText = "Status:\n" + status.substring(0, 1).toUpperCase() + status.substring(1);
         holder.status.setText(statusText);
+
+        // Set click listener
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(session));
     }
 
     @Override

@@ -36,6 +36,6 @@
         android:layout_marginTop="4dp"
         android:layout_toStartOf="@id/status"
         android:maxLines="1"
-        android:text="@string/startTimePlaceholder"
+        android:text="@string/timePlaceholder"
         android:textSize="16sp" />
 </RelativeLayout>

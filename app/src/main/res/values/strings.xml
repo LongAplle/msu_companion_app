@@ -39,6 +39,10 @@
     <string name="msu_companion_logo">MSU Companion logo</string>
 
     <string name="destinationNamePlaceholder">Destination Name</string>
-    <string name="startTimePlaceholder">Start Time</string>
+    <string name="timePlaceholder">Time</string>
+
+    <string name="timeRangeText">%1$s\n-\n%2$s</string>
+    <string name="fromText">From:\n%1$s</string>
+    <string name="toText">To:\n%1$s</string>
 
 </resources>
