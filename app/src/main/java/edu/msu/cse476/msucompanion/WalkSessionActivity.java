@@ -232,7 +232,6 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         }).start();
 
         arrivalAlreadyHandled = false;
-        walkSessionActive = true;
         initialCameraFramed = false;
         Date sessionStartTime = new Date();
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
@@ -266,49 +265,51 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
                         walkSession.setStatus("active");
                         localSessionId = db.walkSessionDao().insert(walkSession);
 
-                        runOnUiThread(() ->
-                                Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show()
+                        runOnUiThread(() -> {
+                            // Start GPS updates
+                            walkSessionActive = true;
+                            locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
+                                @Override
+                                public void onLocationUpdated(Location location) {
+                                    handleLocationUpdate(location);
+                                }
+
+                                @Override
+                                public void onLocationError(String message) {
+                                    Toast.makeText(WalkSessionActivity.this, message, Toast.LENGTH_SHORT).show();
+                                    tvStatus.setText(getString(R.string.tvStatusText, "Error - " + message));
+                                }
+                            });
+
+                            // Ping location to Firestore every 5 minutes so contacts can track progress
+                            sendLocationUpdateRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (walkSessionActive && lastKnownLocation != null) {
+                                        double lat = lastKnownLocation.getLatitude();
+                                        double lng = lastKnownLocation.getLongitude();
+
+                                        // Send SMS notification with maps link
+                                        String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
+                                        sendNotification("My current location: " + mapsLink);
+
+                                        // Also ping location to Firestore under the current session
+                                        addLocationPing(lat, lng);
+                                    }
+                                    if (walkSessionActive) {
+                                        handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes
+                                    }
+                                }
+                            };
+                            handler.post(sendLocationUpdateRunnable);
+
+                            Toast.makeText(WalkSessionActivity.this, "Walk session started", Toast.LENGTH_SHORT).show();
+                            }
                         );
                     }).start();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
-        // Start GPS updates
-        locationHelper.startLocationUpdates(new LocationHelper.LocationUpdateListener() {
-            @Override
-            public void onLocationUpdated(Location location) {
-                handleLocationUpdate(location);
-            }
-
-            @Override
-            public void onLocationError(String message) {
-                Toast.makeText(WalkSessionActivity.this, message, Toast.LENGTH_SHORT).show();
-                tvStatus.setText(getString(R.string.tvStatusText, "Error - " + message));
-            }
-        });
-
-        // Ping location to Firestore every 5 minutes so contacts can track progress
-        sendLocationUpdateRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (walkSessionActive && lastKnownLocation != null) {
-                    double lat = lastKnownLocation.getLatitude();
-                    double lng = lastKnownLocation.getLongitude();
-
-                    // Send SMS notification with maps link
-                    String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-                    sendNotification("My current location: " + mapsLink);
-
-                    // Also ping location to Firestore under the current session
-                    addLocationPing(lat, lng);
-                }
-                if (walkSessionActive) {
-                    handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes
-                }
-            }
-        };
-        handler.post(sendLocationUpdateRunnable);
     }
 
     /*
