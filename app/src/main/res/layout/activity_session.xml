@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:andriod="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".SessionActivity">
 
@@ -28,8 +27,9 @@
         android:id="@+id/destinationInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints="location"
         android:minHeight="48dp"
-        android:hint="@string/destination_hint"
+        android:hint="@string/destinationHint"
         android:focusable="false"
         android:clickable="true"
         android:cursorVisible="false"

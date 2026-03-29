@@ -12,13 +12,13 @@ package edu.msu.cse476.msucompanion;
 public class Destination {
 
     // Name of the destination (example: "MSU Library")
-    private String name;
+    private final String name;
 
     // Latitude coordinate of the destination
-    private double latitude;
+    private final double latitude;
 
     // Longitude coordinate of the destination
-    private double longitude;
+    private final double longitude;
 
     /*
      * Constructor

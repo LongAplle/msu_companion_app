@@ -8,7 +8,7 @@
         android:id="@+id/btnSearchPlace"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search for destination" />
+        android:text="@string/destinationSearchText" />
 
     <FrameLayout
         android:id="@+id/mapContainer"
@@ -21,13 +21,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:text="No destination selected"
+        android:text="@string/noDestinationSelectedText"
         android:textSize="16sp" />
 
     <Button
         android:id="@+id/btnUseSelectedLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Use selected location" />
+        android:text="@string/useLocationText" />
 
 </LinearLayout>

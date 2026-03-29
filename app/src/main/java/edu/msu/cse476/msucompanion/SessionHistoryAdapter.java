@@ -17,7 +17,7 @@ public class SessionHistoryAdapter extends RecyclerView.Adapter<SessionHistoryAd
     private final SessionHistoryAdapter.OnItemClickListener listener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView destinationName, status, startTime;
+        final TextView destinationName, status, startTime;
 
         ViewHolder(View itemView) {
             super(itemView);

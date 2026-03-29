@@ -31,9 +31,6 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
 
     private GoogleMap googleMap;
     private TextView tvSelectedPlace;
-    private Button btnSearchPlace;
-    private Button btnUseSelectedLocation;
-
     private String selectedPlaceName;
     private double selectedLat;
     private double selectedLng;
@@ -71,8 +68,8 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         setContentView(R.layout.activity_map_picker);
 
         tvSelectedPlace = findViewById(R.id.tvSelectedPlace);
-        btnSearchPlace = findViewById(R.id.btnSearchPlace);
-        btnUseSelectedLocation = findViewById(R.id.btnUseSelectedLocation);
+        Button btnSearchPlace = findViewById(R.id.btnSearchPlace);
+        Button btnUseSelectedLocation = findViewById(R.id.btnUseSelectedLocation);
 
         // Initialize Places SDK once before using autocomplete
         String apiKey = BuildConfig.PLACES_API_KEY;
@@ -149,8 +146,7 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         googleMap.addMarker(new MarkerOptions().position(latLng).title(title));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
 
-        tvSelectedPlace.setText(
-                "Selected: " + title + "\nLat: " + latLng.latitude + "\nLng: " + latLng.longitude
-        );
+        String selectText = "Selected: " + title + "\nLat: " + latLng.latitude + "\nLng: " + latLng.longitude;
+        tvSelectedPlace.setText(selectText);
     }
 }

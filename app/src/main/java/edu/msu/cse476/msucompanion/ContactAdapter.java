@@ -13,7 +13,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     private final OnItemClickListener listener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView text1, text2;
+        final TextView text1, text2;
 
         ViewHolder(View itemView) {
             super(itemView);
