@@ -30,4 +30,11 @@ public interface ContactDao {
 
     @Query("SELECT phoneNumber FROM contacts WHERE userId = :userId")
     List<String> getAllPhoneNumber(String userId);
+
+    // Clears all local contacts for a user before re-fetching from Firestore on login
+    // Prevents duplicate contacts from appearing if the user logs in multiple times
+    @Query("DELETE FROM contacts WHERE userId = :userId")
+    void deleteAllByUserId(String userId);
+
+
 }

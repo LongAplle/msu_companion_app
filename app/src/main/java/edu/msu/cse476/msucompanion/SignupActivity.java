@@ -68,6 +68,7 @@ public class SignupActivity extends AppCompatActivity {
                                     SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
                                     SharedPreferences.Editor editor = prefs.edit();
                                     editor.putString("userId", uid); // firestore string ID
+                                    editor.putInt("userIdLocal",1); // local room int ID - hardcoded, we assume 1 user per device
                                     editor.putString("full_name", fullName);
                                     editor.putString("username", username);
                                     editor.putString("email", email);

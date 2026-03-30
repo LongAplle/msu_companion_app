@@ -54,13 +54,14 @@ public class AddContactActivity extends AppCompatActivity {
         contactData.put("name", name);
         contactData.put("phone", phone);
 
-        // Create Firestore document and let it generate the remote ID
-        firestoreDb.collection("contacts")
-                .add(contactData)
-                .addOnSuccessListener(documentReference -> {
-                    String remoteId = documentReference.getId();
+        // Create a new Firestore document reference first so we can get the ID
+        // before saving so this way both Firestore and Room use the same remoteId
+        String remoteId = firestoreDb.collection("contacts").document().getId();
 
-                    // Add to local Room database
+        firestoreDb.collection("contacts").document(remoteId)
+                .set(contactData)
+                .addOnSuccessListener(unused -> {
+                    // Save to local Room database using the same remoteId from Firestore
                     new Thread(() -> {
                         Contact contact = new Contact(remoteId, currUserId, name, phone);
                         db.contactDao().insert(contact);
@@ -71,8 +72,8 @@ public class AddContactActivity extends AppCompatActivity {
                     }).start();
                 })
                 .addOnFailureListener(e ->
-                    runOnUiThread(() ->
-                            Toast.makeText(AddContactActivity.this, "Failed to save contact: " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                        runOnUiThread(() ->
+                                Toast.makeText(AddContactActivity.this, "Failed to save contact: " + e.getMessage(), Toast.LENGTH_SHORT).show())
                 );
     }
 }
