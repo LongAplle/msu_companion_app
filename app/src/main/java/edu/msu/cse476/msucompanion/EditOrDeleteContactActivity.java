@@ -94,11 +94,7 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                                 });
                             }).start();
                         })
-                        .addOnFailureListener(e -> {
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, "Failed to update contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        });
+                        .addOnFailureListener(e -> runOnUiThread(() -> Toast.makeText(this, "Failed to update contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show()));
             } else {
                 runOnUiThread(() -> Toast.makeText(this, "Contact not found", Toast.LENGTH_SHORT).show());
             }
@@ -126,11 +122,7 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                                 });
                             }).start();
                         })
-                        .addOnFailureListener(e -> {
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, "Failed to delete contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        });
+                        .addOnFailureListener(e -> runOnUiThread(() -> Toast.makeText(this, "Failed to delete contact remotely: " + e.getMessage(), Toast.LENGTH_SHORT).show()));
             }
         }).start();
     }

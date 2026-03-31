@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -52,7 +53,7 @@ public class SignupActivity extends AppCompatActivity {
             // Firebase Auth handles password hashing securely
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
-                        String uid = authResult.getUser().getUid();
+                        String uid = Objects.requireNonNull(authResult.getUser()).getUid();
 
                         // Store extra user info in Firestore using Auth uid as document ID
                         Map<String, Object> user = new HashMap<>();
@@ -68,7 +69,6 @@ public class SignupActivity extends AppCompatActivity {
                                     SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
                                     SharedPreferences.Editor editor = prefs.edit();
                                     editor.putString("userId", uid); // firestore string ID
-                                    editor.putInt("userIdLocal",1); // local room int ID - hardcoded, we assume 1 user per device
                                     editor.putString("full_name", fullName);
                                     editor.putString("username", username);
                                     editor.putString("email", email);
@@ -79,13 +79,9 @@ public class SignupActivity extends AppCompatActivity {
                                     startActivity(intent);
                                     finish();
                                 })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                });
+                                .addOnFailureListener(e -> Toast.makeText(this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                     })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                    .addOnFailureListener(e -> Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         } else {
             passwordEditText.setText("");

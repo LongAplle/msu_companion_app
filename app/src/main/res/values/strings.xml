@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">MSU Companion</string>
     <string name="usernameHint">Username</string>
-    <string name="emailHint">Email or Username</string>
-    <string name="emailOnlyHint">Email</string>
+    <string name="emailOrUsernameHint">Email or Username</string>
+    <string name="emailHint">Email</string>
     <string name="passwordHint">Password</string>
     <string name="loginText">Login</string>
     <string name="greetingText">Hello, %1$s!</string>
