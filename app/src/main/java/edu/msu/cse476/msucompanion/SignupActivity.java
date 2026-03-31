@@ -48,45 +48,51 @@ public class SignupActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         String password2 = passwordRetypeEditText.getText().toString();
 
-        if (password.equals(password2) && !username.isEmpty() && !email.isEmpty()) {
-
-            // Firebase Auth handles password hashing securely
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                    .addOnSuccessListener(authResult -> {
-                        String uid = Objects.requireNonNull(authResult.getUser()).getUid();
-
-                        // Store extra user info in Firestore using Auth uid as document ID
-                        Map<String, Object> user = new HashMap<>();
-                        user.put("fullName", fullName);
-                        user.put("username", username);
-                        user.put("email", email);
-
-                        FirebaseFirestore.getInstance().collection("users")
-                                .document(uid)
-                                .set(user)
-                                .addOnSuccessListener(unused -> {
-                                    // Save to SharedPreferences after both Auth and Firestore succeed
-                                    SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = prefs.edit();
-                                    editor.putString("userId", uid); // firestore string ID
-                                    editor.putString("full_name", fullName);
-                                    editor.putString("username", username);
-                                    editor.putString("email", email);
-                                    editor.apply();
-
-                                    Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
-        } else {
+        if (!password.equals(password2)) {
             passwordEditText.setText("");
             passwordRetypeEditText.setText("");
-            Toast.makeText(this, "Passwords do not match or fields are empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+
+        } else if (username.isEmpty() || email.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+
+        } else if (username.contains("@")) {
+            usernameEditText.setText("");
+            Toast.makeText(this, "Username cannot contain '@'", Toast.LENGTH_SHORT).show();
+
+        } else {
+            // Firebase Auth handles password hashing securely
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    String uid = Objects.requireNonNull(authResult.getUser()).getUid();
+
+                    // Store extra user info in Firestore using Auth uid as document ID
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("fullName", fullName);
+                    user.put("username", username);
+                    user.put("email", email);
+
+                    FirebaseFirestore.getInstance().collection("users")
+                        .document(uid)
+                        .set(user)
+                        .addOnSuccessListener(unused -> {
+                            // Save to SharedPreferences after both Auth and Firestore succeed
+                            SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("userId", uid); // firestore string ID
+                            editor.putString("full_name", fullName);
+                            editor.putString("username", username);
+                            editor.putString("email", email);
+                            editor.apply();
+
+                            Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
 }
