@@ -1,17 +1,11 @@
 ### To do
-## Remote database:
-- [ ] Fetch User Data from Server (userId, full name, username, email) (LoginActivity)
-- [ ] Populate local Contact and Session History (LoginActivity)
-
 ## SMS:
 - [ ] Send SMS message to all trusted contacts (WalkSessionActivity)
 
 ## UI:
 - [ ] layout: add_contact, contact_list, destination_picker, edit_or_delete, walk_session, session_history
+      (multiple screen sizes, resolutions, and orientations)
 
 ## Other:
-- [ ] Add view session history functionality (Main Acitivity)
-
 - [ ] Implement foreground service for the app
-- [ ] Implement returning to current active walk session when returning to the app
 
