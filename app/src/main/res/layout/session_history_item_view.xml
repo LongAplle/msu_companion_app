@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:gravity="end"
         android:text="@string/sessionStatus"
         android:textSize="18sp" />
 
