@@ -63,6 +63,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     // Distance threshold used to determine arrival (in meters)
     private static final float ARRIVAL_THRESHOLD_METERS = 50.0f;
 
+    // SMS / Firestore ping interval (in milliseconds)
+    private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
+
     // Permission request code for SMS (will be handled in activity)
     public static final int SMS_PERMISSION_REQUEST_CODE = 2001;
 
@@ -189,7 +192,6 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
     // Session management
     private void startWalkSession() {
-        // Guard against starting an already active session
         if (walkSessionActive) return;
 
         // Check if the app has location permission
@@ -197,87 +199,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
             return;  // The activity will request permission and restart the service
         }
 
-        // Fetch all trusted contacts from local database
-        new Thread(() -> {
-            List<String> phones = db.contactDao().getAllPhoneNumber(currUserId);
+        fetchAllTrustedContacts();
 
-            handler.post(() -> {
-                contactPhones = phones;
-
-                // Send initial SMS
-                sendSMSMessage("I'm starting a walk to " + destination.getName() + ".");
-            });
-        }).start();
-
-        Date sessionStartTime = new Date();
-
-        // Create a new session document in Firestore when the walk starts
-        Map<String, Object> session = new HashMap<>();
-        session.put("userId", currUserId);
-        session.put("destinationName", destination.getName());
-        session.put("destinationLat", destination.getLatitude());
-        session.put("destinationLng", destination.getLongitude());
-        session.put("startTime", sessionStartTime);
-        session.put("endTime", null);
-        session.put("status", "active");
-
-        firestoreDb.collection("sessions")
-                .add(session)
-                .addOnSuccessListener(documentReference -> {
-                    // Save the session ID so we can update it when the walk ends
-                    currentSessionId = documentReference.getId();
-
-                    // Add Session to local Room database
-                    new Thread(() -> {
-                        WalkSession walkSession = new WalkSession();
-                        walkSession.setRemoteId(currentSessionId);
-                        walkSession.setUserId(currUserId);
-                        walkSession.setStartTime(sessionStartTime);
-                        walkSession.setDestinationName(destination.getName());
-                        walkSession.setDestinationLat(destination.getLatitude());
-                        walkSession.setDestinationLng(destination.getLongitude());
-                        walkSession.setStatus("active");
-                        localSessionId = db.walkSessionDao().insert(walkSession);
-
-                        handler.post(() -> {
-                                    // Start GPS updates
-                                    walkSessionActive = true;
-                                    locationHelper.startLocationUpdates(WalkSessionService.this);
-
-                                    // Ping location to Firestore every 5 minutes so contacts can track progress
-                                    sendLocationUpdateRunnable = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (walkSessionActive && lastKnownLocation != null) {
-                                                double lat = lastKnownLocation.getLatitude();
-                                                double lng = lastKnownLocation.getLongitude();
-
-                                                // Send SMS notification with maps link
-                                                String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-                                                sendSMSMessage("My current location: " + mapsLink);
-
-                                                // Also ping location to Firestore under the current session
-                                                addLocationPing(lat, lng);
-                                            }
-                                            if (walkSessionActive) {
-                                                handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes
-                                            }
-                                        }
-                                    };
-                                    handler.post(sendLocationUpdateRunnable);
-
-                                    // Notify all listeners that the session has started
-                                    for (SessionListener listener : listeners) {
-                                        listener.onSessionStarted();
-                                    }
-
-                                    Toast.makeText(this, "Walk session started", Toast.LENGTH_SHORT).show();
-                                }
-                        );
-                    }).start();
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        addFirestore(new Date());
     }
 
     private void stopWalkSession(boolean arrived) {
@@ -307,28 +231,8 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
         Date endTime = new Date();
 
-        // Update the session document in Firestore with end time and final status
-        if (currentSessionId != null) {
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("endTime", endTime);
-            updates.put("status", arrived ? "completed" : "stopped");
-
-            firestoreDb.collection("sessions")
-                    .document(currentSessionId)
-                    .update(updates);
-        }
-
-        // Update the session in local Room database
-        if (localSessionId != -1) {
-            new Thread(() -> {
-                WalkSession session = db.walkSessionDao().getSessionById(localSessionId);
-                if (session != null) {
-                    session.setEndTime(endTime);
-                    session.setStatus(arrived ? "completed" : "stopped");
-                    db.walkSessionDao().update(session);
-                }
-            }).start();
-        }
+        updateFirestoreFinal(endTime, arrived);
+        updateRoomFinal(endTime, arrived);
 
         // Notify all listeners that the session ended
         for (SessionListener listener : listeners) {
@@ -379,32 +283,11 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         if (currentSessionId == null || localSessionId == -1 || startLocation == null) return;
         startLocationUpdated = true;
 
-        double startLat = startLocation.getLatitude();
-        double startLng = startLocation.getLongitude();
-
-        // Firestore update
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("startLat", startLat);
-        updates.put("startLng", startLng);
-        firestoreDb.collection("sessions")
-                .document(currentSessionId)
-                .update(updates)
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to update start location remotely", Toast.LENGTH_SHORT).show());
-
-        // Local Room update
-        new Thread(() -> {
-            WalkSession session = db.walkSessionDao().getSessionById(localSessionId);
-            if (session != null) {
-                session.setStartLat(startLat);
-                session.setStartLng(startLng);
-                db.walkSessionDao().update(session);
-            }
-        }).start();
+        updateFirestoreStartLocation();
+        updateRoomStartLocation();
     }
 
     private void addLocationPing(double lat, double lng) {
-        // Don't ping if there's no active session in Firestore yet
         if (currentSessionId == null) return;
 
         Map<String, Object> ping = new HashMap<>();
@@ -424,7 +307,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         stopWalkSession(true);
     }
 
-    /*
+    /**
      * Send a notification to all trusted contacts
      */
     private void sendSMSMessage(String message) {
@@ -432,4 +315,175 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
             // TODO: Send SMS message to the phoneNumber
         }
     }
+
+    // Async helpers
+    /**
+     * Fetch all trusted contacts from local database
+     */
+    private void fetchAllTrustedContacts() {
+        new Thread(() -> {
+            List<String> phones = db.contactDao().getAllPhoneNumber(currUserId);
+
+            handler.post(() -> {
+                contactPhones = phones;
+
+                // Send initial SMS
+                sendSMSMessage("I'm starting a walk to " + destination.getName() + ".");
+            });
+        }).start();
+    }
+
+    /**
+     * Create a new session document in Firestore
+     */
+    private void addFirestore(Date sessionStartTime) {
+        Map<String, Object> session = new HashMap<>();
+        session.put("userId", currUserId);
+        session.put("destinationName", destination.getName());
+        session.put("destinationLat", destination.getLatitude());
+        session.put("destinationLng", destination.getLongitude());
+        session.put("startTime", sessionStartTime);
+        session.put("endTime", null);
+        session.put("status", "active");
+
+        firestoreDb.collection("sessions")
+                .add(session)
+                .addOnSuccessListener(documentReference -> {
+                    // Save the session ID so we can update it when the walk ends
+                    currentSessionId = documentReference.getId();
+                    addRoomInitial(sessionStartTime);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Update the start location in Firestore
+     */
+    private void updateFirestoreStartLocation() {
+        if (currentSessionId == null) return;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("startLat", startLocation.getLatitude());
+        updates.put("startLng", startLocation.getLongitude());
+        firestoreDb.collection("sessions")
+                .document(currentSessionId)
+                .update(updates)
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to update start location remotely", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Update the session document in Firestore with end time and final status
+     */
+    private void updateFirestoreFinal(Date endTime, boolean arrived) {
+        if (currentSessionId == null) return;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("endTime", endTime);
+        updates.put("status", arrived ? "completed" : "stopped");
+
+        firestoreDb.collection("sessions")
+                .document(currentSessionId)
+                .update(updates);
+    }
+
+    /**
+     * Add initial data of the session to the local Room database
+     */
+    private void addRoomInitial(Date sessionStartTime) {
+        new Thread(() -> {
+            WalkSession walkSession = new WalkSession();
+            walkSession.setRemoteId(currentSessionId);
+            walkSession.setUserId(currUserId);
+            walkSession.setStartTime(sessionStartTime);
+            walkSession.setDestinationName(destination.getName());
+            walkSession.setDestinationLat(destination.getLatitude());
+            walkSession.setDestinationLng(destination.getLongitude());
+            walkSession.setStatus("active");
+            localSessionId = db.walkSessionDao().insert(walkSession);
+
+            startGPSUpdate();
+        }).start();
+    }
+
+    /**
+     * Update the start location in Room database
+     */
+    private void updateRoomStartLocation() {
+        if (localSessionId == -1) return;
+
+        new Thread(() -> {
+            WalkSession session = db.walkSessionDao().getSessionById(localSessionId);
+            if (session != null) {
+                session.setStartLat(startLocation.getLatitude());
+                session.setStartLng(startLocation.getLongitude());
+                db.walkSessionDao().update(session);
+            }
+        }).start();
+    }
+
+    /**
+     * Update the session document in Room database with end time and final status
+     */
+    private void updateRoomFinal(Date endTime, boolean arrived) {
+        if (localSessionId == -1) return;
+
+        new Thread(() -> {
+            WalkSession session = db.walkSessionDao().getSessionById(localSessionId);
+            if (session != null) {
+                session.setEndTime(endTime);
+                session.setStatus(arrived ? "completed" : "stopped");
+                db.walkSessionDao().update(session);
+            }
+        }).start();
+
+    }
+
+    /**
+     * Start GPS updates and notify all bound activities
+     */
+    private void startGPSUpdate() {
+        handler.post(() -> {
+                    // Start GPS updates
+                    walkSessionActive = true;
+                    locationHelper.startLocationUpdates(WalkSessionService.this);
+
+                    startPing();
+
+                    // Notify all listeners that the session has started
+                    for (SessionListener listener : listeners) {
+                        listener.onSessionStarted();
+                    }
+
+                    Toast.makeText(this, "Walk session started", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+
+    /**
+     * Start periodic location pings to Firestore
+     */
+    private void startPing() {
+        sendLocationUpdateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (walkSessionActive && lastKnownLocation != null) {
+                    double lat = lastKnownLocation.getLatitude();
+                    double lng = lastKnownLocation.getLongitude();
+
+                    // Send SMS notification with maps link
+                    String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
+                    sendSMSMessage("My current location: " + mapsLink);
+
+                    // Also ping location to Firestore under the current session
+                    addLocationPing(lat, lng);
+                }
+                if (walkSessionActive) {
+                    handler.postDelayed(this, LOCATION_PING_INTERVAL_MS); // 5 minutes
+                }
+            }
+        };
+        handler.post(sendLocationUpdateRunnable);
+    };
 }
