@@ -73,7 +73,7 @@ public class AddContactActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e ->
                         runOnUiThread(() ->
-                                Toast.makeText(AddContactActivity.this, "Failed to save contact: " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                                Toast.makeText(AddContactActivity.this, "Failed to save contact: " + e.getMessage(), Toast.LENGTH_LONG).show())
                 );
     }
 }

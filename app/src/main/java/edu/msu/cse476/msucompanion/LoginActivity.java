@@ -87,11 +87,11 @@ public class LoginActivity extends AppCompatActivity {
                                 finish();
                             })
                             .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Failed to fetch user data: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Failed to fetch user data: " + e.getMessage(), Toast.LENGTH_LONG).show()
                             );
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
     }
 
@@ -110,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
     }
 
@@ -138,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }).start())
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to fetch contacts: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Failed to fetch contacts: " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
     }
 
@@ -178,7 +178,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }).start())
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to fetch session history: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Failed to fetch session history: " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
     }
 
