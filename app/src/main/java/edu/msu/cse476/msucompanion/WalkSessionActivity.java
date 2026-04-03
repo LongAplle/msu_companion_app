@@ -231,6 +231,16 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
                 LocationHelper.LOCATION_PERMISSION_REQUEST_CODE);
     }
 
+    private boolean checkSMSPermission() {
+        return checkSelfPermission(android.Manifest.permission.SEND_SMS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestSMSPermission() {
+        requestPermissions(new String[]{android.Manifest.permission.SEND_SMS},
+                WalkSessionService.SMS_PERMISSION_REQUEST_CODE);
+    }
+
     /*
      * Handles the result of the location permission request.
      * If permission is granted, the walk session begins automatically.
@@ -240,14 +250,23 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Handle location permission request result
         if (requestCode == LocationHelper.LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Retry starting the session
                 onToggleStartStop(null);
             } else {
                 Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show();
-                tvStatus.setText(getString(R.string.tvStatusText, "Permission denied"));
+                tvStatus.setText(getString(R.string.tvStatusText, "Location permission denied"));
             }
+        }
+
+        // Handle SMS permission request result
+        if (requestCode == WalkSessionService.SMS_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "SMS permission not granted.\nContacts will not be notified via SMS", Toast.LENGTH_SHORT).show();
+            }
+            onToggleStartStop(null);  // Proceed with the walk session
         }
     }
 
@@ -262,12 +281,21 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
             return;
         }
 
-        // If the service is already active, stop it; otherwise start it
+        // Stop the walk session if already active
+        // place this before the SMS permission request so if SMS permission is denied before,
+        // stopping a session will not ask for permission again
         if (walkSessionService != null && walkSessionService.isWalkSessionActive()) {
             onStopWalkSession();
-        } else {
-            onStartWalkSession();
+            return;
         }
+
+        // Request SMS permission if not already granted
+        if (!checkSMSPermission()) {
+            requestSMSPermission();
+            return;
+        }
+
+        onStartWalkSession();
     }
 
     /*
@@ -455,11 +483,7 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
 
                 if (responseCode < 200 || responseCode >= 300) {
                     runOnUiThread(() ->
-                            Toast.makeText(
-                                    WalkSessionActivity.this,
-                                    "Route request failed",
-                                    Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(WalkSessionActivity.this, "Route request failed", Toast.LENGTH_SHORT).show()
                     );
                     return;
                 }
@@ -495,11 +519,7 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(
-                                WalkSessionActivity.this,
-                                "Unable to fetch walking route",
-                                Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(WalkSessionActivity.this, "Unable to fetch walking route", Toast.LENGTH_SHORT).show()
                 );
             } finally {
                 if (connection != null) {
