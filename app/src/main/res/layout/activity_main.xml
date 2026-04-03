@@ -52,8 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="@string/createSession"
-        android:onClick="onStartSession"
+        android:text="@string/createSessionText"
         android:backgroundTint="@color/msu_green"/>
 
     <Button

@@ -53,7 +53,7 @@
         android:clickable="true"
         android:focusable="true"
         android:minHeight="48dp"
-        android:onClick="onGoBackToMain"
+        android:onClick="onGoBack"
         android:text="@string/GoBack"
         android:textSize="14sp" />
 

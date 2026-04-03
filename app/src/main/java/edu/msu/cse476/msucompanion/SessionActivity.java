@@ -53,9 +53,7 @@ public class SessionActivity extends AppCompatActivity {
         mapPickerLauncher.launch(intent);
     }
 
-    public void onGoBackToMain(View view) {
-        Intent intent = new Intent(SessionActivity.this, MainActivity.class);
-        startActivity(intent);
+    public void onGoBack(View view) {
         finish();
     }
 
@@ -71,5 +69,6 @@ public class SessionActivity extends AppCompatActivity {
         intent.putExtra("destination_lat", selectedDestinationLat);
         intent.putExtra("destination_lng", selectedDestinationLng);
         startActivity(intent);
+        finish();
     }
 }

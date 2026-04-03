@@ -585,4 +585,9 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         );
         return results[0];
     }
+
+    // Go back to main
+    public void onGoBack(View view) {
+        finish();
+    }
 }

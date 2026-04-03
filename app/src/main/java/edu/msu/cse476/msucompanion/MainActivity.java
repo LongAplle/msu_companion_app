@@ -5,13 +5,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-    private SharedPreferences prefs;
+    private SharedPreferences prefs;  // user preferences
+
+    private Button startSessionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,20 @@ public class MainActivity extends AppCompatActivity {
         TextView greetingText = findViewById(R.id.greetingText);
         String greetingMsg = getString(R.string.greetingText, displayName);
         greetingText.setText(greetingMsg);
+
+        startSessionButton = findViewById(R.id.startSessionButton);
+
+        // Observe the active session live data
+        ActiveSessionRepository.getActiveSession().observe(this, destination -> {
+            if (destination != null) {
+                // There is an active walk
+                setResumeSession(destination);
+            }
+            else {
+                // There is no active walk
+                setCreateSession();
+            }
+        });
     }
 
     public void onViewContacts(View view) {
@@ -61,12 +78,32 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void onStartSession(View view) {
+    /**
+     * Go to the destination picker activity.
+     */
+    private void onStartSession() {
         Intent intent = new Intent(this, SessionActivity.class);
         startActivity(intent);
     }
 
+    /**
+     * Go to the walk session activity.
+     */
+    private void onResumeSession(String destName, double destLat, double destLng) {
+        Intent intent = new Intent(this, WalkSessionActivity.class);
+        intent.putExtra("destination_name", destName);
+        intent.putExtra("destination_lat", destLat);
+        intent.putExtra("destination_lng", destLng);
+        startActivity(intent);
+    }
+
     public void onLogOut(View view) {
+        // Prevent logout if a session is active
+        if (ActiveSessionRepository.getActiveSession().getValue() != null) {
+            Toast.makeText(this, "Please stop your walk session before logging out.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         // Clear Room data for the current user
         String currUserId = prefs.getString("userId", null);
         if (currUserId != null) {
@@ -86,5 +123,18 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void setCreateSession() {
+        startSessionButton.setText(R.string.createSessionText);
+        startSessionButton.setOnClickListener(v -> onStartSession());
+    }
+
+    private void setResumeSession(Destination destination) {
+        startSessionButton.setText(R.string.resumeSessionText);
+        startSessionButton.setOnClickListener(v -> onResumeSession(
+                destination.getName(),
+                destination.getLatitude(),
+                destination.getLongitude()));
     }
 }

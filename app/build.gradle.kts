@@ -48,10 +48,12 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation("com.google.android.material:material:1.9.0")
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
     implementation(libs.places)
+
+    implementation(libs.lifecycle.livedata)
+    implementation(libs.lifecycle.runtime)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
@@ -62,8 +64,8 @@ dependencies {
     implementation(libs.room.ktx)
 
     // Firebase BoM — manages all Firebase library versions
-    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-messaging")
-    implementation("com.google.firebase:firebase-auth")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.auth)
 }

@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -50,7 +51,6 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     private boolean startLocationUpdated = false;
     private boolean walkSessionActive = false;
     private boolean arrivalAlreadyHandled = false;
-    private List<String> contactPhones = new ArrayList<>();
 
     // Helper class used to manage GPS/location services
     private LocationHelper locationHelper;
@@ -64,7 +64,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     private static final float ARRIVAL_THRESHOLD_METERS = 50.0f;
 
     // SMS / Firestore ping interval (in milliseconds)
-    private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
+    private static final long LOCATION_PING_INTERVAL_MS = 3 * 1000;  // 5 minutes
 
     // Permission request code for SMS (will be handled in activity)
     public static final int SMS_PERMISSION_REQUEST_CODE = 2001;
@@ -199,9 +199,10 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
             return;  // The activity will request permission and restart the service
         }
 
-        fetchAllTrustedContacts();
-
         addFirestore(new Date());
+
+        // Send initial SMS
+        sendSMSMessageToAllContacts("I'm starting a walk to " + destination.getName() + ".");
     }
 
     private void stopWalkSession(boolean arrived) {
@@ -209,12 +210,12 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
         // Notify contacts
         if (arrived) {
-            sendSMSMessage("I have arrived at " + destination.getName() + ".");
+            sendSMSMessageToAllContacts("I have arrived at " + destination.getName() + ".");
         } else if (lastKnownLocation != null) {
             double lat = lastKnownLocation.getLatitude();
             double lng = lastKnownLocation.getLongitude();
             String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-            sendSMSMessage("I stopped the walk. My final location: " + mapsLink);
+            sendSMSMessageToAllContacts("I stopped the walk. My final location: " + mapsLink);
         }
 
         walkSessionActive = false;
@@ -233,6 +234,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
         updateFirestoreFinal(endTime, arrived);
         updateRoomFinal(endTime, arrived);
+        ActiveSessionRepository.clearActiveSession();
 
         // Notify all listeners that the session ended
         for (SessionListener listener : listeners) {
@@ -310,29 +312,19 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     /**
      * Send a notification to all trusted contacts
      */
-    private void sendSMSMessage(String message) {
-        for (String phoneNumber : contactPhones) {
-            // TODO: Send SMS message to the phoneNumber
-        }
+    private void sendSMSMessageToAllContacts(String message) {
+        new Thread(() -> {
+            List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
+
+            for (String phoneNumber : contactPhones) {
+                sendSMSMessage(phoneNumber, message);
+                Log.i("WalkSessionService", "Sending SMS to " + phoneNumber + ": " + message);
+            }
+        }).start();
+
     }
 
     // Async helpers
-    /**
-     * Fetch all trusted contacts from local database
-     */
-    private void fetchAllTrustedContacts() {
-        new Thread(() -> {
-            List<String> phones = db.contactDao().getAllPhoneNumber(currUserId);
-
-            handler.post(() -> {
-                contactPhones = phones;
-
-                // Send initial SMS
-                sendSMSMessage("I'm starting a walk to " + destination.getName() + ".");
-            });
-        }).start();
-    }
-
     /**
      * Create a new session document in Firestore
      */
@@ -445,20 +437,22 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
      */
     private void startGPSUpdate() {
         handler.post(() -> {
-                    // Start GPS updates
-                    walkSessionActive = true;
-                    locationHelper.startLocationUpdates(WalkSessionService.this);
+            // Start GPS updates
+            walkSessionActive = true;
+            locationHelper.startLocationUpdates(WalkSessionService.this);
 
-                    startPing();
+            startPing();
 
-                    // Notify all listeners that the session has started
-                    for (SessionListener listener : listeners) {
-                        listener.onSessionStarted();
-                    }
+            // Live data for the active session
+            ActiveSessionRepository.setActiveSession(destination);
 
-                    Toast.makeText(this, "Walk session started", Toast.LENGTH_SHORT).show();
-                }
-        );
+            // Notify all listeners that the session has started
+            for (SessionListener listener : listeners) {
+                listener.onSessionStarted();
+            }
+
+            Toast.makeText(this, "Walk session started", Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**
@@ -474,7 +468,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
                     // Send SMS notification with maps link
                     String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-                    sendSMSMessage("My current location: " + mapsLink);
+                    sendSMSMessageToAllContacts("My current location: " + mapsLink);
 
                     // Also ping location to Firestore under the current session
                     addLocationPing(lat, lng);
@@ -485,5 +479,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
             }
         };
         handler.post(sendLocationUpdateRunnable);
-    };
+    }
+
+    private void sendSMSMessage(String phoneNumber, String message) {
+        // TODO: Send SMS message to the phoneNumber
+    }
 }

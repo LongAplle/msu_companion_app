@@ -60,6 +60,19 @@
             android:text="@string/startWalkText"
             android:backgroundTint="@color/msu_green" />
 
+        <TextView
+            android:id="@+id/goBackFromSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="48dp"
+            android:onClick="onGoBack"
+            android:text="@string/GoBack"
+            android:textSize="14sp" />
+
     </LinearLayout>
 
 </LinearLayout>
