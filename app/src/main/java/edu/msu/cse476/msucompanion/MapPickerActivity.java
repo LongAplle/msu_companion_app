@@ -75,7 +75,7 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         // Initialize Places SDK once before using autocomplete
         String apiKey = BuildConfig.PLACES_API_KEY;
         if (TextUtils.isEmpty(apiKey) || "DEFAULT_API_KEY".equals(apiKey)) {
-            Toast.makeText(this, "Missing Places API key", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Missing Places API key", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }

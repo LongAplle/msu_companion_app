@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     public void onLogOut(View view) {
         // Prevent logout if a session is active
         if (ActiveSessionRepository.getActiveSession().getValue() != null) {
-            Toast.makeText(this, "Please stop your walk session before logging out.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Please stop your walk session before logging out.", Toast.LENGTH_SHORT).show();
             return;
         }
 

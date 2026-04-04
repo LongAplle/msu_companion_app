@@ -11,7 +11,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
+import android.telephony.SmsManager;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -64,7 +64,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     private static final float ARRIVAL_THRESHOLD_METERS = 50.0f;
 
     // SMS / Firestore ping interval (in milliseconds)
-    private static final long LOCATION_PING_INTERVAL_MS = 3 * 1000;  // 5 minutes
+    private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
 
     // Permission request code for SMS (will be handled in activity)
     public static final int SMS_PERMISSION_REQUEST_CODE = 2001;
@@ -305,7 +305,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     }
 
     private void onArrivalDetected() {
-        Toast.makeText(this, "Safe arrival detected!", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Safe arrival detected!", Toast.LENGTH_SHORT).show();
         stopWalkSession(true);
     }
 
@@ -318,10 +318,8 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
             for (String phoneNumber : contactPhones) {
                 sendSMSMessage(phoneNumber, message);
-                Log.i("WalkSessionService", "Sending SMS to " + phoneNumber + ": " + message);
             }
         }).start();
-
     }
 
     // Async helpers
@@ -346,7 +344,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
                     addRoomInitial(sessionStartTime);
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed to start session: " + e.getMessage(), Toast.LENGTH_LONG).show());
     }
 
     /**
@@ -362,7 +360,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
                 .document(currentSessionId)
                 .update(updates)
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to update start location remotely", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed to update start location remotely: " + e.getMessage(), Toast.LENGTH_LONG).show());
     }
 
     /**
@@ -482,6 +480,13 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     }
 
     private void sendSMSMessage(String phoneNumber, String message) {
-        // TODO: Send SMS message to the phoneNumber
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, "Failed to send SMS: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
     }
 }
