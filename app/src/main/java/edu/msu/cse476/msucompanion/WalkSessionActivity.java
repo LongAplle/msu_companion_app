@@ -88,26 +88,34 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_walk_session);
 
-        // Determine if this is to start a new session or just observing an active one
-        startNewSessionFlag = getIntent().getBooleanExtra("start_new_session", false);
+        // Get current user ID from SharedPreferences (only for service, not used in activity)
+        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+        String currUserId = prefs.getString(Keys.PREF_USER_ID, null);
+        if (currUserId == null) {
+            finish();
+            return;
+        }
+
+        startNewSessionFlag = getIntent().getBooleanExtra(Keys.EXTRA_START_NEW_SESSION, false);
         if (!startNewSessionFlag) {
-            // The session has ended, so finish this activity
             if (!ActiveSessionRepository.hasActiveSession()) {
+                // The session has ended, so finish this activity
                 finish();
                 return;
             }
         }
 
-        setContentView(R.layout.activity_walk_session);
+        String destinationName = getIntent().getStringExtra(Keys.EXTRA_DESTINATION_NAME);
+        double destinationLat = getIntent().getDoubleExtra(Keys.EXTRA_DESTINATION_LAT, 0.0);
+        double destinationLng = getIntent().getDoubleExtra(Keys.EXTRA_DESTINATION_LNG, 0.0);
 
-        // Get current user ID from SharedPreferences (only for service, not used in activity)
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        String currUserId = prefs.getString("userId", null);
-        if (currUserId == null) {
-            finish();
-            return;
+        if (destinationName == null) {
+            destinationName = "Unknown";
         }
+
+        destination = new Destination(destinationName, destinationLat, destinationLng);
 
         // Initialize UI components
         TextView tvDestination = findViewById(R.id.tvDestination);
@@ -116,17 +124,6 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         tvDistance = findViewById(R.id.tvDistance);
         tvStatus = findViewById(R.id.tvStatus);
 
-        String destinationName = getIntent().getStringExtra("destination_name");
-        double destinationLat = getIntent().getDoubleExtra("destination_lat", 0.0);
-        double destinationLng = getIntent().getDoubleExtra("destination_lng", 0.0);
-
-        if (destinationName == null) {
-            destinationName = "Unknown";
-        }
-
-        destination = new Destination(destinationName, destinationLat, destinationLng);
-
-        // Display the selected destination on screen
         tvDestination.setText(getString(R.string.tvDestinationText, destination.getName()));
         tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, "None"));
         tvDistance.setText(getString(R.string.tvDistanceText, Float.NaN));
@@ -324,10 +321,10 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
      */
     private void onStartWalkSession() {
         Intent intent = new Intent(this, WalkSessionService.class);
-        intent.setAction("START_SESSION");
-        intent.putExtra("destination_name", destination.getName());
-        intent.putExtra("destination_lat", destination.getLatitude());
-        intent.putExtra("destination_lng", destination.getLongitude());
+        intent.setAction(WalkSessionService.ACTION_START_SESSION);
+        intent.putExtra(Keys.EXTRA_DESTINATION_NAME, destination.getName());
+        intent.putExtra(Keys.EXTRA_DESTINATION_LAT, destination.getLatitude());
+        intent.putExtra(Keys.EXTRA_DESTINATION_LNG, destination.getLongitude());
         startService(intent);  // will update the button text when it actually starts
     }
 
@@ -336,7 +333,7 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
      */
     private void onStopWalkSession() {
         Intent intent = new Intent(this, WalkSessionService.class);
-        intent.setAction("STOP_SESSION");
+        intent.setAction(WalkSessionService.ACTION_STOP_SESSION);
         startService(intent); // The service will notify us via onSessionEnded, then we unbind and finish
     }
 

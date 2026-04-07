@@ -20,12 +20,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
 
-        String userId = prefs.getString("userId", null);
-        String email = prefs.getString("email", null);
-        String fullName = prefs.getString("full_name", null);
-        String username = prefs.getString("username", null);
+        String userId = prefs.getString(Keys.PREF_USER_ID, null);
+        String email = prefs.getString(Keys.PREF_EMAIL, null);
+        String fullName = prefs.getString(Keys.PREF_FULL_NAME, null);
+        String username = prefs.getString(Keys.PREF_USERNAME, null);
 
         if (userId == null) {
             // No user logged in → go to LoginActivity
@@ -91,10 +91,10 @@ public class MainActivity extends AppCompatActivity {
      */
     private void onResumeSession(String destName, double destLat, double destLng) {
         Intent intent = new Intent(this, WalkSessionActivity.class);
-        intent.putExtra("destination_name", destName);
-        intent.putExtra("destination_lat", destLat);
-        intent.putExtra("destination_lng", destLng);
-        intent.putExtra("start_new_session", false);
+        intent.putExtra(Keys.EXTRA_DESTINATION_NAME, destName);
+        intent.putExtra(Keys.EXTRA_DESTINATION_LAT, destLat);
+        intent.putExtra(Keys.EXTRA_DESTINATION_LNG, destLng);
+        intent.putExtra(Keys.EXTRA_START_NEW_SESSION, false);
         startActivity(intent);
     }
 
@@ -106,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Clear Room data for the current user
-        String currUserId = prefs.getString("userId", null);
-        if (currUserId != null) {
+        String userId = prefs.getString(Keys.PREF_USER_ID, null);
+        if (userId != null) {
             new Thread(() -> {
                 AppDatabase db = AppDatabase.getInstance(this);
                 db.clearAllTables();

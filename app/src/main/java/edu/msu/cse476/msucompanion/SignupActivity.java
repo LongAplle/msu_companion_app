@@ -62,8 +62,8 @@ public class SignupActivity extends AppCompatActivity {
 
         } else {
             // Check if username is already taken in Firestore
-            FirebaseFirestore.getInstance().collection("users")
-                .whereEqualTo("username", username)
+            FirebaseFirestore.getInstance().collection(Keys.COLLECTION_USERS)
+                .whereEqualTo(Keys.FIELD_USER_USERNAME, username)
                 .get()
                 .addOnSuccessListener(query -> {
                     if (!query.isEmpty()) {
@@ -92,21 +92,21 @@ public class SignupActivity extends AppCompatActivity {
 
                 // Store extra user info in Firestore using Auth uid as document ID
                 Map<String, Object> user = new HashMap<>();
-                user.put("fullName", fullName);
-                user.put("username", username);
-                user.put("email", email);
+                user.put(Keys.FIELD_USER_FULL_NAME, fullName);
+                user.put(Keys.FIELD_USER_USERNAME, username);
+                user.put(Keys.FIELD_USER_EMAIL, email);
 
-                FirebaseFirestore.getInstance().collection("users")
+                FirebaseFirestore.getInstance().collection(Keys.COLLECTION_USERS)
                     .document(uid)
                     .set(user)
                     .addOnSuccessListener(unused -> {
                         // Save to SharedPreferences after both Auth and Firestore succeed
-                        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString("userId", uid); // firestore string ID
-                        editor.putString("full_name", fullName);
-                        editor.putString("username", username);
-                        editor.putString("email", email);
+                        editor.putString(Keys.PREF_USER_ID, uid); // firestore string ID
+                        editor.putString(Keys.PREF_FULL_NAME, fullName);
+                        editor.putString(Keys.PREF_USERNAME, username);
+                        editor.putString(Keys.PREF_EMAIL, email);
                         editor.apply();
 
                         Toast.makeText(this, "Sign Up Successful!", Toast.LENGTH_SHORT).show();

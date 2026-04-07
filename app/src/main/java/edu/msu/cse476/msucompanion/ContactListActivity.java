@@ -27,8 +27,8 @@ public class ContactListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_contact_list);
 
         // Get current user from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        currUserId = prefs.getString("userId", null);
+        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+        currUserId = prefs.getString(Keys.PREF_USER_ID, null);
         if (currUserId == null) {
             finish();
             return;
@@ -75,9 +75,9 @@ public class ContactListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ContactAdapter(new ArrayList<>(), contact -> {
             Intent intent = new Intent(ContactListActivity.this, EditOrDeleteContactActivity.class);
-            intent.putExtra("contact_id", contact.getId());
-            intent.putExtra("contact_name", contact.getName());
-            intent.putExtra("contact_phone", contact.getPhoneNumber());
+            intent.putExtra(Keys.EXTRA_CONTACT_ID, contact.getId());
+            intent.putExtra(Keys.EXTRA_CONTACT_NAME, contact.getName());
+            intent.putExtra(Keys.EXTRA_CONTACT_PHONE, contact.getPhoneNumber());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);

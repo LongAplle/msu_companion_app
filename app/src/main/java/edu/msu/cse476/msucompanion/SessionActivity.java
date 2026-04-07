@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SessionActivity extends AppCompatActivity {
-
     private EditText destinationEditText;
     private String selectedDestinationName;
     private double selectedDestinationLat;
@@ -25,9 +24,9 @@ public class SessionActivity extends AppCompatActivity {
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                            selectedDestinationName = result.getData().getStringExtra("destination_name");
-                            selectedDestinationLat = result.getData().getDoubleExtra("destination_lat", 0.0);
-                            selectedDestinationLng = result.getData().getDoubleExtra("destination_lng", 0.0);
+                            selectedDestinationName = result.getData().getStringExtra(Keys.EXTRA_DESTINATION_NAME);
+                            selectedDestinationLat = result.getData().getDoubleExtra(Keys.EXTRA_DESTINATION_LAT, 0.0);
+                            selectedDestinationLng = result.getData().getDoubleExtra(Keys.EXTRA_DESTINATION_LNG, 0.0);
                             hasSelectedDestination = true;
 
                             if (selectedDestinationName != null) {
@@ -65,10 +64,10 @@ public class SessionActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent(SessionActivity.this, WalkSessionActivity.class);
-        intent.putExtra("destination_name", selectedDestinationName);
-        intent.putExtra("destination_lat", selectedDestinationLat);
-        intent.putExtra("destination_lng", selectedDestinationLng);
-        intent.putExtra("start_new_session", true);
+        intent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedDestinationName);
+        intent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedDestinationLat);
+        intent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedDestinationLng);
+        intent.putExtra(Keys.EXTRA_START_NEW_SESSION, true);
         startActivity(intent);
         finish();
     }

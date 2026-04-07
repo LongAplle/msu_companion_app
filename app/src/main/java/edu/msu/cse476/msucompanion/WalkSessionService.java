@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -32,6 +33,13 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
     // Notification ID for the foreground service, can be any number
     private static final int NOTIFICATION_ID = 2026;
+
+    // Permission request code for SMS (will be handled in activity)
+    public static final int SMS_PERMISSION_REQUEST_CODE = 2001;
+
+    // Action constants for communication with the service
+    public static final String ACTION_START_SESSION = "START_SESSION";
+    public static final String ACTION_STOP_SESSION = "STOP_SESSION";
 
     // Local Binder for communication with the service
     private final IBinder binder = new LocalBinder();
@@ -66,9 +74,6 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
     // SMS / Firestore ping interval (in milliseconds)
     private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
-
-    // Permission request code for SMS (will be handled in activity)
-    public static final int SMS_PERMISSION_REQUEST_CODE = 2001;
 
     // Interface for activities to receive updates
     public interface SessionListener {
@@ -111,22 +116,22 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         String action = intent.getAction();
         if (action != null) {
             switch (action) {
-                case "START_SESSION":
+                case ACTION_START_SESSION:
                     // Extract destination and other data from intent
-                    String destName = intent.getStringExtra("destination_name");
-                    double destLat = intent.getDoubleExtra("destination_lat", 0.0);
-                    double destLng = intent.getDoubleExtra("destination_lng", 0.0);
+                    String destName = intent.getStringExtra(Keys.EXTRA_DESTINATION_NAME);
+                    double destLat = intent.getDoubleExtra(Keys.EXTRA_DESTINATION_LAT, 0.0);
+                    double destLng = intent.getDoubleExtra(Keys.EXTRA_DESTINATION_LNG, 0.0);
                     destination = new Destination(destName, destLat, destLng);
 
                     // Get current user ID
-                    SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-                    currUserId = prefs.getString("userId", null);
+                    SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+                    currUserId = prefs.getString(Keys.PREF_USER_ID, null);
                     if (currUserId != null) {
                         startWalkSession();
                     }
                     break;
 
-                case "STOP_SESSION":
+                case ACTION_STOP_SESSION:
                     stopWalkSession(false);
                     break;
             }
@@ -171,10 +176,10 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     private Notification createNotification() {
         Intent notifIntent = new Intent(this, WalkSessionActivity.class);
         notifIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        notifIntent.putExtra("destination_name", destination != null ? destination.getName() : "");
-        notifIntent.putExtra("destination_lat", destination != null ? destination.getLatitude() : 0.0);
-        notifIntent.putExtra("destination_lng", destination != null ? destination.getLongitude() : 0.0);
-        notifIntent.putExtra("start_new_session", false);
+        notifIntent.putExtra(Keys.EXTRA_DESTINATION_NAME, destination != null ? destination.getName() : "");
+        notifIntent.putExtra(Keys.EXTRA_DESTINATION_LAT, destination != null ? destination.getLatitude() : 0.0);
+        notifIntent.putExtra(Keys.EXTRA_DESTINATION_LNG, destination != null ? destination.getLongitude() : 0.0);
+        notifIntent.putExtra(Keys.EXTRA_START_NEW_SESSION, false);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, notifIntent,
@@ -312,9 +317,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         ping.put("timestamp", new Date());
 
         // Pings are stored as a sub-collection under the session document
-        firestoreDb.collection("sessions")
+        firestoreDb.collection(Keys.COLLECTION_SESSIONS)
                 .document(currentSessionId)
-                .collection("pings")
+                .collection(Keys.COLLECTION_PINGS)
                 .add(ping);
     }
 
@@ -342,15 +347,15 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
      */
     private void addFirestore(Date sessionStartTime) {
         Map<String, Object> session = new HashMap<>();
-        session.put("userId", currUserId);
-        session.put("destinationName", destination.getName());
-        session.put("destinationLat", destination.getLatitude());
-        session.put("destinationLng", destination.getLongitude());
-        session.put("startTime", sessionStartTime);
-        session.put("endTime", null);
-        session.put("status", "active");
+        session.put(Keys.FIELD_USER_ID, currUserId);
+        session.put(Keys.FIELD_SESSION_DESTINATION_NAME, destination.getName());
+        session.put(Keys.FIELD_SESSION_DESTINATION_LAT, destination.getLatitude());
+        session.put(Keys.FIELD_SESSION_DESTINATION_LNG, destination.getLongitude());
+        session.put(Keys.FIELD_SESSION_START_TIME, sessionStartTime);
+        session.put(Keys.FIELD_SESSION_END_TIME, null);
+        session.put(Keys.FIELD_SESSION_STATUS, "active");
 
-        firestoreDb.collection("sessions")
+        firestoreDb.collection(Keys.COLLECTION_SESSIONS)
                 .add(session)
                 .addOnSuccessListener(documentReference -> {
                     // Save the session ID so we can update it when the walk ends
@@ -368,9 +373,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         if (currentSessionId == null) return;
 
         Map<String, Object> updates = new HashMap<>();
-        updates.put("startLat", startLocation.getLatitude());
-        updates.put("startLng", startLocation.getLongitude());
-        firestoreDb.collection("sessions")
+        updates.put(Keys.FIELD_SESSION_START_LAT, startLocation.getLatitude());
+        updates.put(Keys.FIELD_SESSION_START_LNG, startLocation.getLongitude());
+        firestoreDb.collection(Keys.COLLECTION_SESSIONS)
                 .document(currentSessionId)
                 .update(updates)
                 .addOnFailureListener(e ->
@@ -384,10 +389,10 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         if (currentSessionId == null) return;
 
         Map<String, Object> updates = new HashMap<>();
-        updates.put("endTime", endTime);
-        updates.put("status", arrived ? "completed" : "stopped");
+        updates.put(Keys.FIELD_SESSION_END_TIME, endTime);
+        updates.put(Keys.FIELD_SESSION_STATUS, arrived ? "completed" : "stopped");
 
-        firestoreDb.collection("sessions")
+        firestoreDb.collection(Keys.COLLECTION_SESSIONS)
                 .document(currentSessionId)
                 .update(updates);
     }

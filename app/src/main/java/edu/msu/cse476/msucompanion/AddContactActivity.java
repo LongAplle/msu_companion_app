@@ -26,8 +26,8 @@ public class AddContactActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
 
         // Get current user from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        currUserId = prefs.getString("userId", null);
+        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+        currUserId = prefs.getString(Keys.PREF_USER_ID, null);
         if (currUserId == null) {
             finish();
             return;
@@ -50,15 +50,15 @@ public class AddContactActivity extends AppCompatActivity {
         }
 
         Map<String, Object> contactData = new HashMap<>();
-        contactData.put("userId", currUserId);
-        contactData.put("name", name);
-        contactData.put("phone", phone);
+        contactData.put(Keys.FIELD_USER_ID, currUserId);
+        contactData.put(Keys.FIELD_CONTACT_NAME, name);
+        contactData.put(Keys.FIELD_CONTACT_PHONE, phone);
 
         // Create a new Firestore document reference first so we can get the ID
         // before saving so this way both Firestore and Room use the same remoteId
-        String remoteId = firestoreDb.collection("contacts").document().getId();
+        String remoteId = firestoreDb.collection(Keys.COLLECTION_CONTACTS).document().getId();
 
-        firestoreDb.collection("contacts").document(remoteId)
+        firestoreDb.collection(Keys.COLLECTION_CONTACTS).document(remoteId)
                 .set(contactData)
                 .addOnSuccessListener(unused -> {
                     // Save to local Room database using the same remoteId from Firestore

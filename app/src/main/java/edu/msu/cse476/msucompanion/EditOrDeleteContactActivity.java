@@ -26,8 +26,8 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_or_delete_contact);
 
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        String currUserId = prefs.getString("userId", null);  // Firestore string ID
+        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+        String currUserId = prefs.getString(Keys.PREF_USER_ID, null);  // Firestore string ID
 
         if (currUserId == null) {
             finish();
@@ -40,9 +40,9 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
 
         // Get contact data passed from the previous activity
         Intent intent = getIntent();
-        contactId = intent.getLongExtra("contact_id", -1);
-        String name = intent.getStringExtra("contact_name");
-        String phone = intent.getStringExtra("contact_phone");
+        contactId = intent.getLongExtra(Keys.EXTRA_CONTACT_ID, -1);
+        String name = intent.getStringExtra(Keys.EXTRA_CONTACT_NAME);
+        String phone = intent.getStringExtra(Keys.EXTRA_CONTACT_PHONE);
 
         if (contactId == -1) {
             Toast.makeText(this, "Error loading contact", Toast.LENGTH_SHORT).show();
@@ -75,10 +75,10 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
                 // Update contact in Firestore
                 String remoteId = currentContact.getRemoteId();
                 Map<String, Object> updates = new HashMap<>();
-                updates.put("name", newName);
-                updates.put("phone", newPhone);
+                updates.put(Keys.FIELD_CONTACT_NAME, newName);
+                updates.put(Keys.FIELD_CONTACT_PHONE, newPhone);
 
-                firestoreDb.collection("contacts")
+                firestoreDb.collection(Keys.COLLECTION_CONTACTS)
                         .document(remoteId)
                         .update(updates)
                         .addOnSuccessListener(unused -> {
@@ -108,7 +108,7 @@ public class EditOrDeleteContactActivity extends AppCompatActivity {
             if (currentContact != null) {
                 // Delete contact from Firestore
                 String remoteId = currentContact.getRemoteId();
-                firestoreDb.collection("contacts")
+                firestoreDb.collection(Keys.COLLECTION_CONTACTS)
                         .document(remoteId)
                         .delete()
                         .addOnSuccessListener(unused -> {

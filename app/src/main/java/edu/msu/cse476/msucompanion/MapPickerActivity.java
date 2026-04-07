@@ -100,9 +100,9 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
             }
 
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("destination_name", selectedPlaceName);
-            resultIntent.putExtra("destination_lat", selectedLat);
-            resultIntent.putExtra("destination_lng", selectedLng);
+            resultIntent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedPlaceName);
+            resultIntent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedLat);
+            resultIntent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedLng);
             setResult(Activity.RESULT_OK, resultIntent);
             finish();
         });

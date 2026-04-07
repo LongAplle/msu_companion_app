@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Date;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -58,21 +59,21 @@ public class LoginActivity extends AppCompatActivity {
                     String uid = Objects.requireNonNull(authResult.getUser()).getUid();
 
                     // Fetch user profile (fullName, username) from Firestore
-                    FirebaseFirestore.getInstance().collection("users")
+                    FirebaseFirestore.getInstance().collection(Keys.COLLECTION_USERS)
                             .document(uid)
                             .get()
                             .addOnSuccessListener(document -> {
                                 // Pull full name and username from the Firestore user document
-                                String fullName = document.getString("fullName");
-                                String username = document.getString("username");
+                                String fullName = document.getString(Keys.FIELD_USER_FULL_NAME);
+                                String username = document.getString(Keys.FIELD_USER_USERNAME);
 
                                 // Cache user profile locally in SharedPreferences
-                                SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                                SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = prefs.edit();
-                                editor.putString("userId", uid);
-                                editor.putString("email", email);
-                                editor.putString("full_name", fullName);
-                                editor.putString("username", username);
+                                editor.putString(Keys.PREF_USER_ID, uid);
+                                editor.putString(Keys.PREF_EMAIL, email);
+                                editor.putString(Keys.PREF_FULL_NAME, fullName);
+                                editor.putString(Keys.PREF_USERNAME, username);
                                 editor.apply();
 
                                 // Fetch contacts and session history from Firestore and store them in local database
@@ -97,13 +98,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signInWithUsername(String username, String password) {
         // Query Firestore to find the email linked to this username
-        FirebaseFirestore.getInstance().collection("users")
-                .whereEqualTo("username", username)
+        FirebaseFirestore.getInstance().collection(Keys.COLLECTION_USERS)
+                .whereEqualTo(Keys.FIELD_USER_USERNAME, username)
                 .get()
                 .addOnSuccessListener(query -> {
                     if (!query.isEmpty()) {
                         // Found the user — grab their email and sign in with Firebase Auth
-                        String foundEmail = query.getDocuments().get(0).getString("email");
+                        String foundEmail = query.getDocuments().get(0).getString(Keys.FIELD_USER_EMAIL);
                         signInWithEmail(foundEmail, password);
                     } else {
                         Toast.makeText(this, "Username not found", Toast.LENGTH_SHORT).show();
@@ -119,8 +120,8 @@ public class LoginActivity extends AppCompatActivity {
      * into the local Room database so contacts are available offline
      */
     private void fetchContacts(String uid) {
-        FirebaseFirestore.getInstance().collection("contacts")
-                .whereEqualTo("userId", uid)
+        FirebaseFirestore.getInstance().collection(Keys.COLLECTION_CONTACTS)
+                .whereEqualTo(Keys.FIELD_USER_ID, uid)
                 .get()
                 .addOnSuccessListener(contacts -> new Thread(() -> {
                     // Clear existing local contacts first to avoid duplicates if the user logs in multiple times
@@ -128,8 +129,8 @@ public class LoginActivity extends AppCompatActivity {
 
                     // Insert each contact from Firestore into local Room database
                     for (var doc : contacts.getDocuments()) {
-                        String name = doc.getString("name");
-                        String phone = doc.getString("phone");
+                        String name = doc.getString(Keys.FIELD_CONTACT_NAME);
+                        String phone = doc.getString(Keys.FIELD_CONTACT_PHONE);
                         String remoteId = doc.getId();
 
                         // remoteId links the local Room contact to the Firestore document
@@ -147,8 +148,8 @@ public class LoginActivity extends AppCompatActivity {
      * into the local Room database so sessions are available offline
      */
     private void fetchSessionHistory(String uid) {
-        FirebaseFirestore.getInstance().collection("sessions")
-                .whereEqualTo("userId", uid)
+        FirebaseFirestore.getInstance().collection(Keys.COLLECTION_SESSIONS)
+                .whereEqualTo(Keys.FIELD_USER_ID, uid)
                 .get()
                 .addOnSuccessListener(sessions -> new Thread(() -> {
                     // Clear existing local sessions first to avoid duplicates if the user logs in multiple times
@@ -159,19 +160,22 @@ public class LoginActivity extends AppCompatActivity {
                         WalkSession session = new WalkSession();
                         session.setRemoteId(doc.getId());
                         session.setUserId(uid);
-                        session.setDestinationName(doc.getString("destinationName"));
-                        session.setDestinationLat(doc.getDouble("destinationLat"));
-                        session.setDestinationLng(doc.getDouble("destinationLng"));
-                        session.setStatus(doc.getString("status"));
-                        session.setStartLat(doc.getDouble("startLat"));
-                        session.setStartLng(doc.getDouble("startLng"));
+                        session.setDestinationName(doc.getString(Keys.FIELD_SESSION_DESTINATION_NAME));
+                        session.setDestinationLat(doc.getDouble(Keys.FIELD_SESSION_DESTINATION_LAT));
+                        session.setDestinationLng(doc.getDouble(Keys.FIELD_SESSION_DESTINATION_LNG));
+                        session.setStartLat(doc.getDouble(Keys.FIELD_SESSION_START_LAT));
+                        session.setStartLng(doc.getDouble(Keys.FIELD_SESSION_START_LNG));
+                        session.setStatus(doc.getString(Keys.FIELD_SESSION_STATUS));
 
                         // Convert Firestore timestamps to Date objects
-                        if (doc.getDate("startTime") != null) {
-                            session.setStartTime(doc.getDate("startTime"));
+                        Date startTime = doc.getDate(Keys.FIELD_SESSION_START_TIME);
+                        if (startTime != null) {
+                            session.setStartTime(startTime);
                         }
-                        if (doc.getDate("endTime") != null) {
-                            session.setEndTime(doc.getDate("endTime"));
+
+                        Date endTime = doc.getDate(Keys.FIELD_SESSION_END_TIME);
+                        if (endTime != null) {
+                            session.setEndTime(endTime);
                         }
 
                         db.walkSessionDao().insert(session);

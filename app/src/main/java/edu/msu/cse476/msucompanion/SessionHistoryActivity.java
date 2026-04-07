@@ -23,8 +23,8 @@ public class SessionHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_session_history);
 
         // Get current user from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        currUserId = prefs.getString("userId", null);
+        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+        currUserId = prefs.getString(Keys.PREF_USER_ID, null);
         if (currUserId == null) {
             finish();
             return;
@@ -57,7 +57,7 @@ public class SessionHistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SessionHistoryAdapter(new ArrayList<>(), session -> {
             Intent intent = new Intent(SessionHistoryActivity.this, ViewWalkSession.class);
-            intent.putExtra("session_id", session.getId());
+            intent.putExtra(Keys.EXTRA_SESSION_ID, session.getId());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);

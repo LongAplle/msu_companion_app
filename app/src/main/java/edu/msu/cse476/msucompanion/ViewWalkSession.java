@@ -24,7 +24,7 @@ public class ViewWalkSession extends AppCompatActivity {
         db = AppDatabase.getInstance(this);
 
         Intent intent = getIntent();
-        long sessionId = intent.getLongExtra("session_id", -1);
+        long sessionId = intent.getLongExtra(Keys.EXTRA_SESSION_ID, -1);
 
         if (sessionId == -1) {
             Toast.makeText(this, "Id error", Toast.LENGTH_SHORT).show();
