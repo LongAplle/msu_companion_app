@@ -174,6 +174,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         notifIntent.putExtra("destination_name", destination != null ? destination.getName() : "");
         notifIntent.putExtra("destination_lat", destination != null ? destination.getLatitude() : 0.0);
         notifIntent.putExtra("destination_lng", destination != null ? destination.getLongitude() : 0.0);
+        notifIntent.putExtra("start_new_session", false);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, notifIntent,

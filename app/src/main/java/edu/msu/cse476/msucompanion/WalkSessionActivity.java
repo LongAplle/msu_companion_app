@@ -82,9 +82,23 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         }
     };
 
+    // Flag to determine if this is to start or to resume an active session
+    boolean startNewSessionFlag;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Determine if this is to start a new session or just observing an active one
+        startNewSessionFlag = getIntent().getBooleanExtra("start_new_session", false);
+        if (!startNewSessionFlag) {
+            // The session has ended, so finish this activity
+            if (!ActiveSessionRepository.hasActiveSession()) {
+                finish();
+                return;
+            }
+        }
+
         setContentView(R.layout.activity_walk_session);
 
         // Get current user ID from SharedPreferences (only for service, not used in activity)
@@ -154,8 +168,14 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     private void onServiceBound(IBinder service) {
         WalkSessionService.LocalBinder binder = (WalkSessionService.LocalBinder) service;
         walkSessionService = binder.getService();
-        walkSessionService.registerListener(WalkSessionActivity.this);
         isBound = true;
+
+        if (!startNewSessionFlag && !walkSessionService.isWalkSessionActive()) {
+            finish();
+            return;
+        }
+
+        walkSessionService.registerListener(WalkSessionActivity.this);
 
         Location lastLoc = walkSessionService.getLastKnownLocation();
         if (lastLoc != null) {
@@ -177,6 +197,7 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     // SessionListener implementations
     @Override
     public void onSessionStarted() {
+        startNewSessionFlag = false; // switch to observer mode
         btnToggleWalk.setText(R.string.endWalkText);
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
     }

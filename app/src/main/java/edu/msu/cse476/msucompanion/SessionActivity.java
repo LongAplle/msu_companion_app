@@ -68,6 +68,7 @@ public class SessionActivity extends AppCompatActivity {
         intent.putExtra("destination_name", selectedDestinationName);
         intent.putExtra("destination_lat", selectedDestinationLat);
         intent.putExtra("destination_lng", selectedDestinationLng);
+        intent.putExtra("start_new_session", true);
         startActivity(intent);
         finish();
     }

@@ -94,12 +94,13 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("destination_name", destName);
         intent.putExtra("destination_lat", destLat);
         intent.putExtra("destination_lng", destLng);
+        intent.putExtra("start_new_session", false);
         startActivity(intent);
     }
 
     public void onLogOut(View view) {
         // Prevent logout if a session is active
-        if (ActiveSessionRepository.getActiveSession().getValue() != null) {
+        if (ActiveSessionRepository.hasActiveSession()) {
             Toast.makeText(this, "Please stop your walk session before logging out.", Toast.LENGTH_SHORT).show();
             return;
         }

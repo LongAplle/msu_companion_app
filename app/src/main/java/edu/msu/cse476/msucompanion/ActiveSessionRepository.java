@@ -20,4 +20,8 @@ public class ActiveSessionRepository {
     public static void clearActiveSession() {
         activeSession.postValue(null);
     }
+
+    public static boolean hasActiveSession() {
+        return activeSession.getValue() != null;
+    }
 }
