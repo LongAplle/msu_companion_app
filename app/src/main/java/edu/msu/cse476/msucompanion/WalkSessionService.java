@@ -3,6 +3,7 @@ package edu.msu.cse476.msucompanion;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -168,11 +169,23 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     }
 
     private Notification createNotification() {
+        Intent notifIntent = new Intent(this, WalkSessionActivity.class);
+        notifIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        notifIntent.putExtra("destination_name", destination != null ? destination.getName() : "");
+        notifIntent.putExtra("destination_lat", destination != null ? destination.getLatitude() : 0.0);
+        notifIntent.putExtra("destination_lng", destination != null ? destination.getLongitude() : 0.0);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, notifIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("MSU Companion")
                 .setContentText("Walking session active")
                 .setSmallIcon(android.R.drawable.ic_dialog_map)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
                 .build();
     }
 
