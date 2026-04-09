@@ -200,6 +200,7 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onSessionStarted() {
         startNewSessionFlag = false; // switch to observer mode
+        btnToggleWalk.setEnabled(true);
         btnToggleWalk.setText(R.string.endWalkText);
         tvStatus.setText(getString(R.string.tvStatusText, "Walk session active"));
     }
@@ -318,6 +319,8 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
             return;
         }
 
+        // Prevent double tap while service is starting
+        btnToggleWalk.setEnabled(false);
         onStartWalkSession();
     }
 
