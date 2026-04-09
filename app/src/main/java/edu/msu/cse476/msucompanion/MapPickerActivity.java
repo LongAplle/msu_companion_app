@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Button;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +27,7 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -69,8 +70,16 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         setContentView(R.layout.activity_map_picker);
 
         tvSelectedPlace = findViewById(R.id.tvSelectedPlace);
-        Button btnSearchPlace = findViewById(R.id.btnSearchPlace);
-        Button btnUseSelectedLocation = findViewById(R.id.btnUseSelectedLocation);
+
+        // Restore data if we are recovering from a rotation
+        if (savedInstanceState != null) {
+            hasSelection = savedInstanceState.getBoolean("hasSelection");
+            if (hasSelection) {
+                selectedPlaceName = savedInstanceState.getString("selectedPlaceName");
+                selectedLat = savedInstanceState.getDouble("selectedLat");
+                selectedLng = savedInstanceState.getDouble("selectedLng");
+            }
+        }
 
         // Initialize Places SDK once before using autocomplete
         String apiKey = BuildConfig.PLACES_API_KEY;
@@ -90,25 +99,56 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
                 .replace(R.id.mapContainer, mapFragment)
                 .commit();
         mapFragment.getMapAsync(this);
+    }
 
-        btnSearchPlace.setOnClickListener(v -> openAutocomplete());
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("hasSelection", hasSelection);
+        if (hasSelection) {
+            outState.putString("selectedPlaceName", selectedPlaceName);
+            outState.putDouble("selectedLat", selectedLat);
+            outState.putDouble("selectedLng", selectedLng);
+        }
+    }
 
-        btnUseSelectedLocation.setOnClickListener(v -> {
-            if (!hasSelection) {
-                Toast.makeText(this, "Please select a location first", Toast.LENGTH_SHORT).show();
-                return;
-            }
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        googleMap = map;
 
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedPlaceName);
-            resultIntent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedLat);
-            resultIntent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedLng);
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
+        if (hasSelection) {
+            updateMapSelection(new LatLng(selectedLat, selectedLng), selectedPlaceName);
+        } else {
+            // Default MSU view
+            LatLng msu = new LatLng(42.7284, -84.4834);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(msu, 14f));
+        }
+
+        googleMap.setOnMapClickListener(latLng -> {
+            selectedLat = latLng.latitude;
+            selectedLng = latLng.longitude;
+            selectedPlaceName = "Pinned location";
+            hasSelection = true;
+
+            updateMapSelection(latLng, selectedPlaceName);
         });
     }
 
-    private void openAutocomplete() {
+    public void onSelectLocation(View view) {
+        if (!hasSelection) {
+            Toast.makeText(this, "Please select a location first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedPlaceName);
+        resultIntent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedLat);
+        resultIntent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedLng);
+        setResult(Activity.RESULT_OK, resultIntent);
+        finish();
+    }
+
+    public void onOpenAutocomplete(View view) {
         List<Place.Field> fields = Arrays.asList(
                 Place.Field.DISPLAY_NAME,
                 Place.Field.FORMATTED_ADDRESS,
@@ -123,23 +163,6 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         autocompleteLauncher.launch(intent);
     }
 
-    @Override
-    public void onMapReady(@NonNull GoogleMap map) {
-        googleMap = map;
-
-        LatLng msu = new LatLng(42.7284, -84.4834);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(msu, 14f));
-
-        googleMap.setOnMapClickListener(latLng -> {
-            selectedLat = latLng.latitude;
-            selectedLng = latLng.longitude;
-            selectedPlaceName = "Pinned location";
-            hasSelection = true;
-
-            updateMapSelection(latLng, selectedPlaceName);
-        });
-    }
-
     private void updateMapSelection(LatLng latLng, String title) {
         if (googleMap == null) return;
 
@@ -147,7 +170,7 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         googleMap.addMarker(new MarkerOptions().position(latLng).title(title));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
 
-        String selectText = "Selected: " + title + "\nLat: " + latLng.latitude + "\nLng: " + latLng.longitude;
-        tvSelectedPlace.setText(selectText);
+        String toText = String.format(Locale.US, "%.8f, %.8f", latLng.latitude, latLng.longitude);
+        tvSelectedPlace.setText(getString(R.string.selectDestinationText, title, toText));
     }
 }
