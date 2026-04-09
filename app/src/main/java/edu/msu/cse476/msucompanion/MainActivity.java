@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
      * Go to the destination picker activity.
      */
     private void onStartSession() {
-        Intent intent = new Intent(this, SessionActivity.class);
+        Intent intent = new Intent(this, StartSessionActivity.class);
         startActivity(intent);
     }
 

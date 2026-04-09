@@ -56,7 +56,7 @@ public class SessionHistoryActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.sessionRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SessionHistoryAdapter(new ArrayList<>(), session -> {
-            Intent intent = new Intent(SessionHistoryActivity.this, ViewWalkSession.class);
+            Intent intent = new Intent(SessionHistoryActivity.this, ViewWalkSessionActivity.class);
             intent.putExtra(Keys.EXTRA_SESSION_ID, session.getId());
             startActivity(intent);
         });

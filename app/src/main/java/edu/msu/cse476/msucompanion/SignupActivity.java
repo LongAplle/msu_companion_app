@@ -26,7 +26,9 @@ public class SignupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signup);
 
         TextView goBack = findViewById(R.id.goBackFromSignup);
-        goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        if (goBack != null) {
+            goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        }
     }
 
     public void onGoBackToLogin(View view) {
