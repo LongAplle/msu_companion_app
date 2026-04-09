@@ -35,13 +35,15 @@ public class ViewWalkSessionActivity extends AppCompatActivity {
         new Thread(() -> {
             session = db.walkSessionDao().getSessionById(sessionId);
 
-            if (session == null) {
-                Toast.makeText(this, "Session not found", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
+            runOnUiThread(() -> {
+                if (session == null) {
+                    Toast.makeText(this, "Session not found", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
 
-            populateUI();
+                populateUI();
+            });
         }).start();
     }
 
