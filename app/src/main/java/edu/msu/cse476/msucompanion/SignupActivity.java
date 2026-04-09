@@ -49,17 +49,22 @@ public class SignupActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         String password2 = passwordRetypeEditText.getText().toString();
 
-        if (!password.equals(password2)) {
-            passwordEditText.setText("");
-            passwordRetypeEditText.setText("");
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-
-        } else if (username.isEmpty() || email.isEmpty()) {
+        if (username.isEmpty() || email.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
 
         } else if (username.contains("@")) {
             usernameEditText.setText("");
             Toast.makeText(this, "Username cannot contain '@'", Toast.LENGTH_SHORT).show();
+
+        } else if (password.length() < 8) {
+            passwordEditText.setText("");
+            passwordRetypeEditText.setText("");
+            Toast.makeText(this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show();
+
+        } else if (!password.equals(password2)) {
+            passwordEditText.setText("");
+            passwordRetypeEditText.setText("");
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
 
         } else {
             // Check if username is already taken in Firestore
