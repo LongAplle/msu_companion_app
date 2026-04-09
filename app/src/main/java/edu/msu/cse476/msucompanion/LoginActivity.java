@@ -38,6 +38,11 @@ public class LoginActivity extends AppCompatActivity {
         String input = inputEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
 
+        if (input.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Check if the input looks like an email or a username
         if (input.contains("@")) {
             signInWithEmail(input, password);
