@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class StartSessionActivity extends AppCompatActivity {
@@ -43,9 +44,34 @@ public class StartSessionActivity extends AppCompatActivity {
         destinationEditText = findViewById(R.id.destinationInput);
         destinationEditText.setOnClickListener( v -> onOpenMapPicker());
 
+        // Restore data if we are recovering from a rotation
+        if (savedInstanceState != null) {
+            hasSelectedDestination = savedInstanceState.getBoolean(Keys.STATE_HAS_SELECTION);
+            if (hasSelectedDestination) {
+                selectedDestinationName = savedInstanceState.getString(Keys.STATE_DEST_NAME);
+                selectedDestinationLat = savedInstanceState.getDouble(Keys.STATE_DEST_LAT);
+                selectedDestinationLng = savedInstanceState.getDouble(Keys.STATE_DEST_LNG);
+
+                if (selectedDestinationName != null) {
+                    destinationEditText.setText(selectedDestinationName);
+                }
+            }
+        }
+
         TextView goBack = findViewById(R.id.goBackFromSession);
         if (goBack != null) {
             goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(Keys.STATE_HAS_SELECTION, hasSelectedDestination);
+        if (hasSelectedDestination) {
+            outState.putString(Keys.STATE_DEST_NAME, selectedDestinationName);
+            outState.putDouble(Keys.STATE_DEST_LAT, selectedDestinationLat);
+            outState.putDouble(Keys.STATE_DEST_LNG, selectedDestinationLng);
         }
     }
 

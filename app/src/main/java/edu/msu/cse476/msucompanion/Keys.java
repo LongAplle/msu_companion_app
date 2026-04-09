@@ -22,6 +22,12 @@ public final class Keys {
     public static final String EXTRA_CONTACT_PHONE = "contact_phone";
     public static final String EXTRA_SESSION_ID = "session_id";
 
+    // Instance State Keys
+    public static final String STATE_HAS_SELECTION = "state_has_selection";
+    public static final String STATE_DEST_NAME = "state_dest_name";
+    public static final String STATE_DEST_LAT = "state_dest_lat";
+    public static final String STATE_DEST_LNG = "state_dest_lng";
+
     // Firestore collections
     public static final String COLLECTION_USERS = "users";
     public static final String COLLECTION_CONTACTS = "contacts";

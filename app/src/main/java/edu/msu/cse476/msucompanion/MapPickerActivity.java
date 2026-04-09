@@ -71,13 +71,12 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
 
         tvSelectedPlace = findViewById(R.id.tvSelectedPlace);
 
-        // Restore data if we are recovering from a rotation
         if (savedInstanceState != null) {
-            hasSelection = savedInstanceState.getBoolean("hasSelection");
+            hasSelection = savedInstanceState.getBoolean(Keys.STATE_HAS_SELECTION);
             if (hasSelection) {
-                selectedPlaceName = savedInstanceState.getString("selectedPlaceName");
-                selectedLat = savedInstanceState.getDouble("selectedLat");
-                selectedLng = savedInstanceState.getDouble("selectedLng");
+                selectedPlaceName = savedInstanceState.getString(Keys.STATE_DEST_NAME);
+                selectedLat = savedInstanceState.getDouble(Keys.STATE_DEST_LAT);
+                selectedLng = savedInstanceState.getDouble(Keys.STATE_DEST_LNG);
             }
         }
 
@@ -104,11 +103,11 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("hasSelection", hasSelection);
+        outState.putBoolean(Keys.STATE_HAS_SELECTION, hasSelection);
         if (hasSelection) {
-            outState.putString("selectedPlaceName", selectedPlaceName);
-            outState.putDouble("selectedLat", selectedLat);
-            outState.putDouble("selectedLng", selectedLng);
+            outState.putString(Keys.STATE_DEST_NAME, selectedPlaceName);
+            outState.putDouble(Keys.STATE_DEST_LAT, selectedLat);
+            outState.putDouble(Keys.STATE_DEST_LNG, selectedLng);
         }
     }
 
@@ -134,18 +133,15 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         });
     }
 
-    public void onSelectLocation(View view) {
-        if (!hasSelection) {
-            Toast.makeText(this, "Please select a location first", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private void updateMapSelection(LatLng latLng, String title) {
+        if (googleMap == null) return;
 
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedPlaceName);
-        resultIntent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedLat);
-        resultIntent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedLng);
-        setResult(Activity.RESULT_OK, resultIntent);
-        finish();
+        googleMap.clear();
+        googleMap.addMarker(new MarkerOptions().position(latLng).title(title));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
+
+        String toText = String.format(Locale.US, "%.8f, %.8f", latLng.latitude, latLng.longitude);
+        tvSelectedPlace.setText(getString(R.string.selectDestinationText, title, toText));
     }
 
     public void onOpenAutocomplete(View view) {
@@ -163,14 +159,17 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         autocompleteLauncher.launch(intent);
     }
 
-    private void updateMapSelection(LatLng latLng, String title) {
-        if (googleMap == null) return;
+    public void onSelectLocation(View view) {
+        if (!hasSelection) {
+            Toast.makeText(this, "Please select a location first", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        googleMap.clear();
-        googleMap.addMarker(new MarkerOptions().position(latLng).title(title));
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
-
-        String toText = String.format(Locale.US, "%.8f, %.8f", latLng.latitude, latLng.longitude);
-        tvSelectedPlace.setText(getString(R.string.selectDestinationText, title, toText));
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedPlaceName);
+        resultIntent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedLat);
+        resultIntent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedLng);
+        setResult(Activity.RESULT_OK, resultIntent);
+        finish();
     }
 }
