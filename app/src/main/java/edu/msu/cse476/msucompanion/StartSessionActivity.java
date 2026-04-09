@@ -12,7 +12,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SessionActivity extends AppCompatActivity {
+public class StartSessionActivity extends AppCompatActivity {
     private EditText destinationEditText;
     private String selectedDestinationName;
     private double selectedDestinationLat;
@@ -38,17 +38,19 @@ public class SessionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_session);
+        setContentView(R.layout.activity_start_session);
 
         destinationEditText = findViewById(R.id.destinationInput);
         destinationEditText.setOnClickListener( v -> onOpenMapPicker());
 
         TextView goBack = findViewById(R.id.goBackFromSession);
-        goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        if (goBack != null) {
+            goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        }
     }
 
     public void onOpenMapPicker() {
-        Intent intent = new Intent(SessionActivity.this, MapPickerActivity.class);
+        Intent intent = new Intent(this, MapPickerActivity.class);
         mapPickerLauncher.launch(intent);
     }
 
@@ -67,7 +69,7 @@ public class SessionActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = new Intent(SessionActivity.this, WalkSessionActivity.class);
+        Intent intent = new Intent(this, WalkSessionActivity.class);
         intent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedDestinationName);
         intent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedDestinationLat);
         intent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedDestinationLng);

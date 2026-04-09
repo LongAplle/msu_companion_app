@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Date;
 import java.util.Locale;
 
-public class ViewWalkSession extends AppCompatActivity {
+public class ViewWalkSessionActivity extends AppCompatActivity {
     private AppDatabase db;
 
     private WalkSession session;
