@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Paint;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -128,6 +129,9 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, "None"));
         tvDistance.setText(getString(R.string.tvDistanceText, Float.NaN));
         tvStatus.setText(getString(R.string.tvStatusText, "Waiting"));
+
+        TextView goBack = findViewById(R.id.goBackFromSession);
+        goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
         // Create and attach the map fragment
         SupportMapFragment mapFragment = SupportMapFragment.newInstance();
