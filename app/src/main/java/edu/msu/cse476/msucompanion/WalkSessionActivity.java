@@ -40,6 +40,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /*
  * Activity for the walk session, binding with the service and updating the UI.
@@ -221,8 +222,8 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         if (location == null) return;
 
         // Update UI text
-        tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText,
-                location.getLatitude() + ", " + location.getLongitude()));
+        String locText = String.format(Locale.US, "%.5f, %.5f", location.getLatitude(), location.getLongitude());
+        tvCurrentLocation.setText(getString(R.string.tvCurrentLocationText, locText));
 
         // Update map markers
         updateMapMarkers(location);

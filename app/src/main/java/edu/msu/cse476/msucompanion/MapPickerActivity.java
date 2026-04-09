@@ -140,8 +140,8 @@ public class MapPickerActivity extends AppCompatActivity implements OnMapReadyCa
         googleMap.addMarker(new MarkerOptions().position(latLng).title(title));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
 
-        String toText = String.format(Locale.US, "%.8f, %.8f", latLng.latitude, latLng.longitude);
-        tvSelectedPlace.setText(getString(R.string.selectDestinationText, title, toText));
+        String locText = String.format(Locale.US, "%.5f, %.5f", latLng.latitude, latLng.longitude);
+        tvSelectedPlace.setText(getString(R.string.selectDestinationText, title, locText));
     }
 
     public void onOpenAutocomplete(View view) {

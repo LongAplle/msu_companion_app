@@ -43,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:textColor="@color/white"
             android:backgroundTint="@color/msu_green"
             android:text="@string/createSessionText"
             android:textSize="18sp" />
@@ -54,6 +55,7 @@
             android:layout_marginTop="24dp"
             android:backgroundTint="@color/msu_green"
             android:onClick="onViewContacts"
+            android:textColor="@color/white"
             android:text="@string/contactViewText"
             android:textSize="16sp" />
 
@@ -64,6 +66,7 @@
             android:layout_marginTop="4dp"
             android:backgroundTint="@color/msu_green"
             android:onClick="onViewSessionHistory"
+            android:textColor="@color/white"
             android:text="@string/sessionViewText"
             android:textSize="16sp" />
 
@@ -81,6 +84,7 @@
                 android:onClick="onLogOut"
                 android:text="@string/logoutText"
                 android:textSize="16sp"
+                android:textColor="@color/white"
                 android:backgroundTint="@color/msu_green"/>
         </FrameLayout>
 

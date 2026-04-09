@@ -42,7 +42,6 @@
                 android:hint="@string/emailHint"
                 android:inputType="textEmailAddress"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <EditText
@@ -55,7 +54,6 @@
                 android:hint="@string/usernameHint"
                 android:inputType="text"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <EditText
@@ -68,7 +66,6 @@
                 android:hint="@string/fullNameHint"
                 android:inputType="textPersonName"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <EditText
@@ -81,7 +78,6 @@
                 android:hint="@string/passwordHint"
                 android:inputType="textPassword"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <EditText
@@ -94,7 +90,6 @@
                 android:hint="@string/passwordRetypeHint"
                 android:inputType="textPassword"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <Button
@@ -106,6 +101,7 @@
                 android:text="@string/signupText"
                 android:textSize="18sp"
                 app:cornerRadius="20dp"
+                android:textColor="@color/white"
                 android:backgroundTint="@color/msu_green"/>
 
             <TextView

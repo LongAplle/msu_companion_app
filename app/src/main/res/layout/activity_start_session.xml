@@ -59,6 +59,7 @@
             android:text="@string/sessionTitle"
             android:textSize="18sp"
             android:onClick="onStartSession"
+            android:textColor="@color/white"
             android:backgroundTint="@color/msu_green"/>
 
         <TextView

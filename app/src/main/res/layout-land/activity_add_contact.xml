@@ -46,7 +46,6 @@
                 android:hint="@string/contactNameHint"
                 android:inputType="text"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <EditText
@@ -59,7 +58,6 @@
                 android:hint="@string/contactPhoneHint"
                 android:inputType="phone"
                 android:padding="8dp"
-                android:textColor="@color/black"
                 android:textColorHighlight="@color/cardview_dark_background" />
 
             <Button
@@ -71,6 +69,7 @@
                 android:text="@string/saveText"
                 android:textSize="24sp"
                 app:cornerRadius="20dp"
+                android:textColor="@color/white"
                 android:backgroundTint="@color/msu_green"/>
 
         </LinearLayout>
