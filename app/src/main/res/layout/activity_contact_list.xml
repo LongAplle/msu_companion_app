@@ -13,6 +13,7 @@
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:background="@android:drawable/editbox_background"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:drawablePadding="8dp"
@@ -46,7 +47,9 @@
         android:layout_margin="16dp"
         android:contentDescription="@string/addContact"
         android:onClick="onAddContact"
-        android:src="@drawable/ic_launcher_foreground"
+        android:src="@drawable/ic_add_24"
+        app:backgroundTint="@color/msu_green"
+        app:tint="@android:color/white"
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

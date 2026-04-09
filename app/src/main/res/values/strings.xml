@@ -9,7 +9,7 @@
     <string name="usernameHint">Username</string>
     <string name="emailOrUsernameHint">Email or Username</string>
     <string name="emailHint">Email</string>
-    <string name="fullNameHint">First and Last Name</string>
+    <string name="fullNameHint">Full Name</string>
     <string name="passwordHint">Password</string>
     <string name="passwordRetypeHint">Retype Password</string>
     <string name="loginText">Login</string>
@@ -29,6 +29,7 @@
 
     <string name="destinationSearchText">Search for destination</string>
     <string name="noDestinationSelectedText">No destination selected</string>
+    <string name="selectDestinationText">%1$s\n%2$s</string>"
     <string name="useLocationText">Use selected location</string>
 
     <string name="tvDestinationText">Destination: %1$s</string>
@@ -49,7 +50,7 @@
     <string name="destinationNamePlaceholder">Destination Name</string>
     <string name="timePlaceholder">Time</string>
 
-    <string name="timeRangeText">%1$s\n-\n%2$s</string>
+    <string name="timeRangeText">%1$s - %2$s</string>
     <string name="fromText">From:\n%1$s</string>
     <string name="toText">To:\n%1$s</string>
 

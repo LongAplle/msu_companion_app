@@ -10,15 +10,15 @@ import java.util.List;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
     private List<Contact> contacts;
-    private final OnItemClickListener listener;
+    private final ContactAdapter.OnItemClickListener listener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView text1, text2;
+        final TextView contactName, contactPhone;
 
         ViewHolder(View itemView) {
             super(itemView);
-            text1 = itemView.findViewById(android.R.id.text1);
-            text2 = itemView.findViewById(android.R.id.text2);
+            contactName = itemView.findViewById(R.id.contactName);
+            contactPhone = itemView.findViewById(R.id.contactPhone);
         }
     }
 
@@ -33,17 +33,17 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ContactAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_2, parent, false);
+                .inflate(R.layout.contact_item_view, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Contact contact = contacts.get(position);
-        holder.text1.setText(contact.getName());
-        holder.text2.setText(contact.getPhoneNumber());
+        holder.contactName.setText(contact.getName());
+        holder.contactPhone.setText(contact.getPhoneNumber());
         holder.itemView.setOnClickListener(v -> listener.onItemClick(contact));
     }
 
