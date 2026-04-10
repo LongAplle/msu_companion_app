@@ -333,10 +333,15 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
      */
     private void sendSMSMessageToAllContacts(String message) {
         new Thread(() -> {
-            List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
-
-            for (String phoneNumber : contactPhones) {
-                sendSMSMessage(phoneNumber, message);
+            try {
+                List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
+                for (String phoneNumber : contactPhones) {
+                    sendSMSMessage(phoneNumber, message);
+                }
+            } catch (Exception e) {
+                handler.post(() ->
+                        Toast.makeText(this, "Failed to load contacts: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
             }
         }).start();
     }
@@ -504,8 +509,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
         }
         catch (Exception e) {
-            Toast.makeText(this, "Failed to send SMS: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            handler.post(() ->
+                    Toast.makeText(this, "Failed to send SMS: " + e.getMessage(), Toast.LENGTH_LONG).show()
+            );
         }
-
     }
 }
