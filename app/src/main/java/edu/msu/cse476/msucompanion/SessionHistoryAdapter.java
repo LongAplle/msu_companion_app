@@ -59,8 +59,9 @@ public class SessionHistoryAdapter extends RecyclerView.Adapter<SessionHistoryAd
 
         // Format the status text
         String status = session.getStatus();
-        String statusText = "Status:\n" + status.substring(0, 1).toUpperCase() + status.substring(1);
-        holder.status.setText(statusText);
+        String statusText = status.substring(0, 1).toUpperCase() + status.substring(1);
+        String fStatusText = holder.itemView.getContext().getString(R.string.sessionStatus, statusText);
+        holder.status.setText(fStatusText);
 
         // Set click listener
         holder.itemView.setOnClickListener(v -> listener.onItemClick(session));

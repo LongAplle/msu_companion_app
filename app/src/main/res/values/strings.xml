@@ -44,7 +44,7 @@
     <string name="destinationHint">e.g., Shaw Hall, 1855 Place</string>
     <string name="GoBack">Go back</string>
     <string name="spartan_head_logo">Spartan head logo</string>
-    <string name="sessionStatus">Status:</string>
+    <string name="sessionStatus">Status:\n%1$s</string>
     <string name="msu_companion_logo">MSU Companion logo</string>
 
     <string name="destinationNamePlaceholder">Destination Name</string>

@@ -335,10 +335,12 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         new Thread(() -> {
             try {
                 List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
+
                 for (String phoneNumber : contactPhones) {
                     sendSMSMessage(phoneNumber, message);
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 handler.post(() ->
                         Toast.makeText(this, "Failed to load contacts: " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
