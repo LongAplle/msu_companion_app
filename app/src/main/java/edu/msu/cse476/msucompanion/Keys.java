@@ -54,4 +54,11 @@ public final class Keys {
     public static final String FIELD_SESSION_END_TIME = "endTime";
     public static final String FIELD_SESSION_STATUS = "status";
 
+    //select contacts to notify
+    public static final String EXTRA_SELECTED_CONTACT_IDS = "selected_contact_ids";
+    public static final String EXTRA_USE_ALL_CONTACTS = "use_all_contacts";
+    public static final String STATE_SELECTED_CONTACT_IDS = "state_selected_contact_ids";
+    public static final String STATE_USE_ALL_CONTACTS = "state_use_all_contacts";
+    public static final String STATE_SELECTED_CONTACT_LABEL = "state_selected_contact_label";
+
 }

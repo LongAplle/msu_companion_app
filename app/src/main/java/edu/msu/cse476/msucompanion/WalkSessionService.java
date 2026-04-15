@@ -75,6 +75,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     // SMS / Firestore ping interval (in milliseconds)
     private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
 
+    private boolean useAllContacts = true;
+    private long[] selectedContactIds = new long[0];
+
     // Interface for activities to receive updates
     public interface SessionListener {
         void onSessionStarted();
@@ -122,6 +125,12 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
                     double destLat = intent.getDoubleExtra(Keys.EXTRA_DESTINATION_LAT, 0.0);
                     double destLng = intent.getDoubleExtra(Keys.EXTRA_DESTINATION_LNG, 0.0);
                     destination = new Destination(destName, destLat, destLng);
+
+                    useAllContacts = intent.getBooleanExtra(Keys.EXTRA_USE_ALL_CONTACTS, true);
+                    selectedContactIds = intent.getLongArrayExtra(Keys.EXTRA_SELECTED_CONTACT_IDS);
+                    if (selectedContactIds == null) {
+                        selectedContactIds = new long[0];
+                    }
 
                     // Get current user ID
                     SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
@@ -221,7 +230,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         addFirestore(new Date());
 
         // Send initial SMS
-        sendSMSMessageToAllContacts("I'm starting a walk to " + destination.getName() + ".");
+        sendSMSMessageToChosenContacts("I'm starting a walk to " + destination.getName() + ".");
     }
 
     private void stopWalkSession(boolean arrived) {
@@ -229,12 +238,12 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
         // Notify contacts
         if (arrived) {
-            sendSMSMessageToAllContacts("I have arrived at " + destination.getName() + ".");
+            sendSMSMessageToChosenContacts("I have arrived at " + destination.getName() + ".");
         } else if (lastKnownLocation != null) {
             double lat = lastKnownLocation.getLatitude();
             double lng = lastKnownLocation.getLongitude();
             String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-            sendSMSMessageToAllContacts("I stopped the walk. My final location: " + mapsLink);
+            sendSMSMessageToChosenContacts("I stopped the walk. My final location: " + mapsLink);
         }
 
         walkSessionActive = false;
@@ -331,16 +340,39 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     /**
      * Send a notification to all trusted contacts
      */
-    private void sendSMSMessageToAllContacts(String message) {
+//    private void sendSMSMessageToAllContacts(String message) {
+//        new Thread(() -> {
+//            try {
+//                List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
+//
+//                for (String phoneNumber : contactPhones) {
+//                    sendSMSMessage(phoneNumber, message);
+//                }
+//            }
+//            catch (Exception e) {
+//                handler.post(() ->
+//                        Toast.makeText(this, "Failed to load contacts: " + e.getMessage(), Toast.LENGTH_LONG).show()
+//                );
+//            }
+//        }).start();
+//    }
+
+    private void sendSMSMessageToChosenContacts(String message) {
         new Thread(() -> {
             try {
-                List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
+                List<String> contactPhones;
+
+                if (useAllContacts) {
+                    contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
+                } else {
+                    contactPhones = db.contactDao().getPhoneNumbersForSelectedContacts(currUserId, selectedContactIds);
+                }
 
                 for (String phoneNumber : contactPhones) {
                     sendSMSMessage(phoneNumber, message);
                 }
-            }
-            catch (Exception e) {
+
+            } catch (Exception e) {
                 handler.post(() ->
                         Toast.makeText(this, "Failed to load contacts: " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
@@ -492,7 +524,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
                     // Send SMS notification with maps link
                     String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
-                    sendSMSMessageToAllContacts("My current location: " + mapsLink);
+                    sendSMSMessageToChosenContacts("My current location: " + mapsLink);
 
                     // Also ping location to Firestore under the current session
                     addLocationPing(lat, lng);

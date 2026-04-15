@@ -29,10 +29,47 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/destinationLabel"
+            android:id="@+id/contactSelectionLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/trusted_contacts"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
+        <Button
+            android:id="@+id/selectContactsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/select_specific_contacts"
+            android:onClick="onSelectTrustedContacts"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/msu_green" />
+
+        <Button
+            android:id="@+id/selectAllContactsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/select_all_contacts"
+            android:onClick="onSelectAllContacts"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/msu_green" />
+
+        <TextView
+            android:id="@+id/selectedContactsSummary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/all_contacts_will_be_notified"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/destinationLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
             android:text="@string/finalDest"
             android:textSize="16sp"
             android:textStyle="italic" />
@@ -92,3 +129,4 @@
 
     </FrameLayout>
 </LinearLayout>
+

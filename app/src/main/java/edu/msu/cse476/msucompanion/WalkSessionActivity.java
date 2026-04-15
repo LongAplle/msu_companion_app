@@ -69,6 +69,9 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     private static final long ROUTE_REFRESH_INTERVAL_MS = 15000L;   // 15 sec
     private static final float ROUTE_REFRESH_MIN_MOVE_METERS = 25f; // refetch after meaningful movement
 
+    private boolean useAllContacts = true;
+    private long[] selectedContactIds = new long[0];
+
     // Service binding
     private WalkSessionService walkSessionService;
     private boolean isBound = false;
@@ -98,6 +101,13 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         if (currUserId == null) {
             finish();
             return;
+        }
+
+        Intent sourceIntent = getIntent();
+        useAllContacts = sourceIntent.getBooleanExtra(Keys.EXTRA_USE_ALL_CONTACTS, true);
+        selectedContactIds = sourceIntent.getLongArrayExtra(Keys.EXTRA_SELECTED_CONTACT_IDS);
+        if (selectedContactIds == null) {
+            selectedContactIds = new long[0];
         }
 
         startNewSessionFlag = getIntent().getBooleanExtra(Keys.EXTRA_START_NEW_SESSION, false);
@@ -333,6 +343,10 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         intent.putExtra(Keys.EXTRA_DESTINATION_NAME, destination.getName());
         intent.putExtra(Keys.EXTRA_DESTINATION_LAT, destination.getLatitude());
         intent.putExtra(Keys.EXTRA_DESTINATION_LNG, destination.getLongitude());
+
+        intent.putExtra(Keys.EXTRA_USE_ALL_CONTACTS, useAllContacts);
+        intent.putExtra(Keys.EXTRA_SELECTED_CONTACT_IDS, selectedContactIds);
+
         startService(intent);  // will update the button text when it actually starts
     }
 

@@ -13,12 +13,25 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.widget.Button;
+import androidx.appcompat.app.AlertDialog;
+import java.util.ArrayList;
+import java.util.List;
+
 public class StartSessionActivity extends AppCompatActivity {
     private EditText destinationEditText;
     private String selectedDestinationName;
     private double selectedDestinationLat;
     private double selectedDestinationLng;
     private boolean hasSelectedDestination = false;
+    private AppDatabase db;
+    private String currUserId;
+    private Button selectContactsButton;
+    private TextView selectedContactsSummary;
+    private final ArrayList<Long> selectedContactIds = new ArrayList<>();
+    private boolean useAllContacts = true;
 
     private final ActivityResultLauncher<Intent> mapPickerLauncher =
             registerForActivityResult(
@@ -41,11 +54,35 @@ public class StartSessionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_session);
 
+        db = AppDatabase.getInstance(this);
+
+        SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
+        currUserId = prefs.getString(Keys.PREF_USER_ID, null);
+
+        selectContactsButton = findViewById(R.id.selectContactsButton);
+        selectedContactsSummary = findViewById(R.id.selectedContactsSummary);
+        updateSelectedContactsSummary();
+
         destinationEditText = findViewById(R.id.destinationInput);
         destinationEditText.setOnClickListener( v -> onOpenMapPicker());
 
         // Restore data if we are recovering from a rotation
         if (savedInstanceState != null) {
+            useAllContacts = savedInstanceState.getBoolean(Keys.STATE_USE_ALL_CONTACTS, true);
+
+            ArrayList<Long> restoredIds = (ArrayList<Long>) savedInstanceState.getSerializable(Keys.STATE_SELECTED_CONTACT_IDS);
+            if (restoredIds != null) {
+                selectedContactIds.clear();
+                selectedContactIds.addAll(restoredIds);
+            }
+
+            String restoredLabel = savedInstanceState.getString(Keys.STATE_SELECTED_CONTACT_LABEL);
+            if (restoredLabel != null && selectedContactsSummary != null) {
+                selectedContactsSummary.setText(restoredLabel);
+            } else {
+                updateSelectedContactsSummary();
+            }
+
             hasSelectedDestination = savedInstanceState.getBoolean(Keys.STATE_HAS_SELECTION);
             if (hasSelectedDestination) {
                 selectedDestinationName = savedInstanceState.getString(Keys.STATE_DEST_NAME);
@@ -73,6 +110,11 @@ public class StartSessionActivity extends AppCompatActivity {
             outState.putDouble(Keys.STATE_DEST_LAT, selectedDestinationLat);
             outState.putDouble(Keys.STATE_DEST_LNG, selectedDestinationLng);
         }
+
+        outState.putBoolean(Keys.STATE_USE_ALL_CONTACTS, useAllContacts);
+        outState.putSerializable(Keys.STATE_SELECTED_CONTACT_IDS, selectedContactIds);
+        outState.putString(Keys.STATE_SELECTED_CONTACT_LABEL,
+                selectedContactsSummary.getText().toString());
     }
 
     public void onOpenMapPicker() {
@@ -100,7 +142,90 @@ public class StartSessionActivity extends AppCompatActivity {
         intent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedDestinationLat);
         intent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedDestinationLng);
         intent.putExtra(Keys.EXTRA_START_NEW_SESSION, true);
+
+        if (!useAllContacts && selectedContactIds.isEmpty()) {
+            Toast.makeText(this, "Please select at least one trusted contact or choose Select all contacts", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        intent.putExtra(Keys.EXTRA_USE_ALL_CONTACTS, useAllContacts);
+        long[] selectedIdsArray = new long[selectedContactIds.size()];
+        for (int i = 0; i < selectedContactIds.size(); i++) {
+            selectedIdsArray[i] = selectedContactIds.get(i);
+        }
+        intent.putExtra(Keys.EXTRA_SELECTED_CONTACT_IDS, selectedIdsArray);
+
         startActivity(intent);
         finish();
     }
+
+    public void onSelectAllContacts(View view) {
+        useAllContacts = true;
+        selectedContactIds.clear();
+        updateSelectedContactsSummary();
+        Toast.makeText(this, "All trusted contacts selected", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onSelectTrustedContacts(View view) {
+        new Thread(() -> {
+            List<Contact> contacts = db.contactDao().getContactsForUser(currUserId);
+
+            runOnUiThread(() -> {
+                if (contacts == null || contacts.isEmpty()) {
+                    Toast.makeText(this, "No saved contacts found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String[] names = new String[contacts.size()];
+                boolean[] checkedItems = new boolean[contacts.size()];
+
+                for (int i = 0; i < contacts.size(); i++) {
+                    Contact contact = contacts.get(i);
+                    names[i] = contact.getName() + " (" + contact.getPhoneNumber() + ")";
+                    checkedItems[i] = selectedContactIds.contains(contact.getId());
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select trusted contacts");
+                builder.setMultiChoiceItems(names, checkedItems, (dialog, which, isChecked) -> {
+                    long contactId = contacts.get(which).getId();
+                    if (isChecked) {
+                        if (!selectedContactIds.contains(contactId)) {
+                            selectedContactIds.add(contactId);
+                        }
+                    } else {
+                        selectedContactIds.remove(contactId);
+                    }
+                });
+
+                builder.setPositiveButton("Done", (dialog, which) -> {
+                    useAllContacts = false;
+                    updateSelectedContactsSummary();
+                });
+
+                builder.setNeutralButton("Select all", (dialog, which) -> {
+                    useAllContacts = true;
+                    selectedContactIds.clear();
+                    updateSelectedContactsSummary();
+                });
+
+                builder.setNegativeButton("Cancel", null);
+                builder.show();
+            });
+        }).start();
+    }
+
+
+    private void updateSelectedContactsSummary() {
+        if (selectedContactsSummary == null) return;
+
+        if (useAllContacts) {
+            selectedContactsSummary.setText("All contacts will be notified");
+        } else if (selectedContactIds.isEmpty()) {
+            selectedContactsSummary.setText("No contacts selected");
+        } else {
+            selectedContactsSummary.setText(selectedContactIds.size() + " selected");
+        }
+    }
 }
+
+

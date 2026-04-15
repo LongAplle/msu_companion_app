@@ -34,5 +34,8 @@ public interface ContactDao {
     @Query("DELETE FROM contacts WHERE userId = :userId")
     void deleteAllByUserId(String userId);
 
+    @Query("SELECT phoneNumber FROM contacts WHERE userId = :userId AND id IN (:contactIds)")
+    List<String> getPhoneNumbersForSelectedContacts(String userId, long[] contactIds);
+
 
 }

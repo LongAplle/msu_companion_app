@@ -53,5 +53,9 @@
     <string name="timeRangeText">%1$s - %2$s</string>
     <string name="fromText">From:\n%1$s</string>
     <string name="toText">To:\n%1$s</string>
+    <string name="trusted_contacts">Trusted contacts</string>
+    <string name="select_specific_contacts">Select specific contacts</string>
+    <string name="select_all_contacts">Select all contacts</string>
+    <string name="all_contacts_will_be_notified">(All contacts will be notified)</string>
 
 </resources>
