@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:gravity="center"
     tools:context=".StartSessionActivity">
@@ -16,69 +16,6 @@
         android:text="@string/sessionTitle"
         android:textSize="28sp"
         android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/contactSelectionLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/trustedContacts"
-        android:textSize="16sp"
-        android:textStyle="italic" />
-
-    <Button
-        android:id="@+id/selectContactsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/selectContactsText"
-        android:onClick="onSelectContacts"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/msu_green" />
-
-    <TextView
-        android:id="@+id/selectedContactsSummary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_horizontal"
-        android:text="@string/summaryAllContacts"
-        android:textSize="12sp" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/notifyIntervalLabel"
-            android:labelFor="@+id/notifyIntervalInput"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/notifyIntervalInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:textSize="16sp"
-            android:autofillHints=""
-            android:gravity="center"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:maxLength="3"
-            android:textColor="@color/black"
-            android:textColorHighlight="@color/cardview_dark_background"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/minutesUnit"
-            android:textSize="16sp" />
-    </LinearLayout>
 
     <TextView
         android:id="@+id/destinationLabel"
@@ -113,13 +50,67 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notifyIntervalLabel"
+            android:labelFor="@+id/notifyIntervalInput"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/notifyIntervalInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:textSize="16sp"
+            android:autofillHints=""
+            android:gravity="center"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:maxLength="3"
+            android:textColor="@color/black"
+            android:textColorHighlight="@color/cardview_dark_background"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/minutesUnit"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/selectedContactsSummary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_horizontal"
+        android:text="@string/summaryAllContacts"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+
+    <Button
+        android:id="@+id/selectContactsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSelectContacts"
+        android:text="@string/selectContactsText"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/msu_green"/>
+
     <Button
         android:id="@+id/startWalkingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="@string/sessionTitle"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:onClick="onStartSession"
         android:textColor="@color/white"
         android:backgroundTint="@color/msu_green"/>
@@ -127,12 +118,11 @@
     <TextView
         android:id="@+id/goBackFromSession"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="12dp"
+        android:gravity="center"
         android:clickable="true"
         android:focusable="true"
-        android:minHeight="48dp"
         android:onClick="onGoBack"
         android:text="@string/GoBack"
         android:textSize="16sp" />

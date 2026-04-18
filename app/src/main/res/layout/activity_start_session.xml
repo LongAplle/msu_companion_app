@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="24dp">
+        android:paddingHorizontal="24dp">
 
         <TextView
             android:id="@+id/sessionTitle"
@@ -29,37 +29,31 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/contactSelectionLabel"
+            android:id="@+id/destinationLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/trustedContacts"
+            android:text="@string/finalDest"
             android:textSize="16sp"
             android:textStyle="italic" />
 
-        <Button
-            android:id="@+id/selectContactsButton"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/destinationInput"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/selectContactsText"
-            android:onClick="onSelectContacts"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/msu_green" />
-
-        <TextView
-            android:id="@+id/selectedContactsSummary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_horizontal"
-            android:text="@string/summaryAllContacts"
-            android:textSize="12sp" />
+            android:layout_marginTop="4dp"
+            android:autofillHints="location"
+            android:minHeight="48dp"
+            android:textSize="18sp"
+            android:hint="@string/destinationHint"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:inputType="none" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
@@ -92,27 +86,25 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/destinationLabel"
+            android:id="@+id/selectedContactsSummary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/finalDest"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:text="@string/summaryAllContacts"
             android:textSize="16sp"
-            android:textStyle="italic" />
+            android:textStyle="bold"/>
 
-        <EditText
-            android:id="@+id/destinationInput"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/selectContactsButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:autofillHints="location"
-            android:minHeight="48dp"
-            android:textSize="18sp"
-            android:hint="@string/destinationHint"
-            android:focusable="false"
-            android:clickable="true"
-            android:cursorVisible="false"
-            android:inputType="none" />
+            android:onClick="onSelectContacts"
+            android:text="@string/selectContactsText"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/msu_green"/>
 
         <Button
             android:id="@+id/startWalkingButton"
@@ -120,7 +112,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="@string/sessionTitle"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:onClick="onStartSession"
             android:textColor="@color/white"
             android:backgroundTint="@color/msu_green"/>
@@ -128,12 +120,11 @@
         <TextView
             android:id="@+id/goBackFromSession"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
+            android:gravity="center"
             android:clickable="true"
             android:focusable="true"
-            android:minHeight="48dp"
             android:onClick="onGoBack"
             android:text="@string/GoBack"
             android:textSize="16sp" />
