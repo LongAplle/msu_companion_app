@@ -43,17 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/selectContactsText"
-            android:onClick="onSelectTrustedContacts"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/msu_green" />
-
-        <Button
-            android:id="@+id/selectAllContactsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/selectAllContactsText"
-            android:onClick="onSelectAllContacts"
+            android:onClick="onSelectContacts"
             android:textColor="@color/white"
             android:backgroundTint="@color/msu_green" />
 
@@ -63,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_horizontal"
-            android:text="@string/summaryNoContacts"
+            android:text="@string/summaryAllContacts"
             android:textSize="12sp" />
 
         <TextView

@@ -114,6 +114,67 @@ public class StartSessionActivity extends AppCompatActivity {
         mapPickerLauncher.launch(intent);
     }
 
+    public void onSelectContacts(View view) {
+        new Thread(() -> {
+            List<Contact> contacts = db.contactDao().getContactsForUser(currUserId);
+
+            runOnUiThread(() -> {
+                if (contacts == null || contacts.isEmpty()) {
+                    Toast.makeText(this, "No saved contacts found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String[] names = new String[contacts.size()];
+                boolean[] checkedItems = new boolean[contacts.size()];
+
+                for (int i = 0; i < contacts.size(); i++) {
+                    Contact contact = contacts.get(i);
+                    names[i] = contact.getName() + " (" + contact.getPhoneNumber() + ")";
+                    checkedItems[i] = useAllContacts || selectedContactIds.contains(contact.getId());
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(getString(R.string.selectContactsText));
+
+                // snapshot before showing dialog
+                ArrayList<Long> tempSelection;
+                if (useAllContacts) {
+                    // pre-fill with all contact IDs to match the all-checked visual state
+                    tempSelection = new ArrayList<>();
+                    for (Contact c : contacts) {
+                        tempSelection.add(c.getId());
+                    }
+                } else {
+                    tempSelection = new ArrayList<>(selectedContactIds);
+                }
+                builder.setMultiChoiceItems(names, checkedItems, (dialog, which, isChecked) -> {
+                    long contactId = contacts.get(which).getId();
+                    if (isChecked) {
+                        if (!tempSelection.contains(contactId)) tempSelection.add(contactId);
+                    } else {
+                        tempSelection.remove(contactId);
+                    }
+                });
+
+                builder.setPositiveButton(getString(R.string.doneText), (dialog, which) -> {
+                    selectedContactIds.clear();
+                    selectedContactIds.addAll(tempSelection);
+                    useAllContacts = false;
+                    updateSelectedContactsSummary();
+                });
+
+                builder.setNeutralButton(getString(R.string.selectAllText), (dialog, which) -> {
+                    useAllContacts = true;
+                    selectedContactIds.clear();
+                    updateSelectedContactsSummary();
+                });
+
+                builder.setNegativeButton(getString(R.string.cancelText), null);
+                builder.show();
+            });
+        }).start();
+    }
+
     public void onGoBack(View view) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -150,67 +211,13 @@ public class StartSessionActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onSelectAllContacts(View view) {
-        useAllContacts = true;
-        selectedContactIds.clear();
-        updateSelectedContactsSummary();
-    }
-
-    public void onSelectTrustedContacts(View view) {
-        new Thread(() -> {
-            List<Contact> contacts = db.contactDao().getContactsForUser(currUserId);
-
-            runOnUiThread(() -> {
-                if (contacts == null || contacts.isEmpty()) {
-                    Toast.makeText(this, "No saved contacts found", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                String[] names = new String[contacts.size()];
-                boolean[] checkedItems = new boolean[contacts.size()];
-
-                for (int i = 0; i < contacts.size(); i++) {
-                    Contact contact = contacts.get(i);
-                    names[i] = contact.getName() + " (" + contact.getPhoneNumber() + ")";
-                    checkedItems[i] = selectedContactIds.contains(contact.getId());
-                }
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Select trusted contacts");
-
-                // snapshot before showing dialog
-                ArrayList<Long> tempSelection = new ArrayList<>(selectedContactIds);
-                builder.setMultiChoiceItems(names, checkedItems, (dialog, which, isChecked) -> {
-                    long contactId = contacts.get(which).getId();
-                    if (isChecked) {
-                        if (!tempSelection.contains(contactId)) tempSelection.add(contactId);
-                    } else {
-                        tempSelection.remove(contactId);
-                    }
-                });
-
-                builder.setPositiveButton("Done", (dialog, which) -> {
-                    selectedContactIds.clear();
-                    selectedContactIds.addAll(tempSelection);
-                    useAllContacts = false;
-                    updateSelectedContactsSummary();
-                });
-
-                builder.setNeutralButton("Select all", (dialog, which) -> onSelectAllContacts(null));
-
-                builder.setNegativeButton("Cancel", null);
-                builder.show();
-            });
-        }).start();
-    }
-
     private void updateSelectedContactsSummary() {
         if (selectedContactsSummary == null) return;
 
         if (useAllContacts) {
             selectedContactsSummary.setText(getString(R.string.summaryAllContacts));
         } else if (selectedContactIds.isEmpty()) {
-            selectedContactsSummary.setText(getString(R.string.summaryNoContacts));
+            selectedContactsSummary.setText(getString(R.string.summaryNoContact));
         } else {
             int selectedCount = selectedContactIds.size();
             String text = selectedCount != 1 ?
