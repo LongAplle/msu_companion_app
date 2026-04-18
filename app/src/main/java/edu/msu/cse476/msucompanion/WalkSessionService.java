@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -61,6 +62,10 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     private boolean walkSessionActive = false;
     private boolean arrivalAlreadyHandled = false;
 
+    // Contact selection
+    private boolean useAllContacts = true;
+    private long[] selectedContactIds = new long[0];
+
     // Helper class used to manage GPS/location services
     private LocationHelper locationHelper;
 
@@ -74,9 +79,6 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
 
     // SMS / Firestore ping interval (in milliseconds)
     private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
-
-    private boolean useAllContacts = true;
-    private long[] selectedContactIds = new long[0];
 
     // Interface for activities to receive updates
     public interface SessionListener {
@@ -338,25 +340,8 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     }
 
     /**
-     * Send a notification to all trusted contacts
+     * Send a notification to all chosen contacts
      */
-//    private void sendSMSMessageToAllContacts(String message) {
-//        new Thread(() -> {
-//            try {
-//                List<String> contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
-//
-//                for (String phoneNumber : contactPhones) {
-//                    sendSMSMessage(phoneNumber, message);
-//                }
-//            }
-//            catch (Exception e) {
-//                handler.post(() ->
-//                        Toast.makeText(this, "Failed to load contacts: " + e.getMessage(), Toast.LENGTH_LONG).show()
-//                );
-//            }
-//        }).start();
-//    }
-
     private void sendSMSMessageToChosenContacts(String message) {
         new Thread(() -> {
             try {
@@ -365,6 +350,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
                 if (useAllContacts) {
                     contactPhones = db.contactDao().getAllPhoneNumber(currUserId);
                 } else {
+                    if (selectedContactIds == null || selectedContactIds.length == 0) return;
                     contactPhones = db.contactDao().getPhoneNumbersForSelectedContacts(currUserId, selectedContactIds);
                 }
 

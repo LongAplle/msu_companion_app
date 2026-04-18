@@ -15,20 +15,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.widget.Button;
 import androidx.appcompat.app.AlertDialog;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StartSessionActivity extends AppCompatActivity {
+    private AppDatabase db;
+    private String currUserId;
+
     private EditText destinationEditText;
     private String selectedDestinationName;
     private double selectedDestinationLat;
     private double selectedDestinationLng;
     private boolean hasSelectedDestination = false;
-    private AppDatabase db;
-    private String currUserId;
-    private Button selectContactsButton;
+
     private TextView selectedContactsSummary;
     private final ArrayList<Long> selectedContactIds = new ArrayList<>();
     private boolean useAllContacts = true;
@@ -58,11 +58,12 @@ public class StartSessionActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
         currUserId = prefs.getString(Keys.PREF_USER_ID, null);
+        if (currUserId == null) {
+            finish();
+            return;
+        }
 
-        selectContactsButton = findViewById(R.id.selectContactsButton);
         selectedContactsSummary = findViewById(R.id.selectedContactsSummary);
-        updateSelectedContactsSummary();
-
         destinationEditText = findViewById(R.id.destinationInput);
         destinationEditText.setOnClickListener( v -> onOpenMapPicker());
 
@@ -76,12 +77,7 @@ public class StartSessionActivity extends AppCompatActivity {
                 selectedContactIds.addAll(restoredIds);
             }
 
-            String restoredLabel = savedInstanceState.getString(Keys.STATE_SELECTED_CONTACT_LABEL);
-            if (restoredLabel != null && selectedContactsSummary != null) {
-                selectedContactsSummary.setText(restoredLabel);
-            } else {
-                updateSelectedContactsSummary();
-            }
+            updateSelectedContactsSummary();
 
             hasSelectedDestination = savedInstanceState.getBoolean(Keys.STATE_HAS_SELECTION);
             if (hasSelectedDestination) {
@@ -96,9 +92,7 @@ public class StartSessionActivity extends AppCompatActivity {
         }
 
         TextView goBack = findViewById(R.id.goBackFromSession);
-        if (goBack != null) {
-            goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        }
+        goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
     }
 
     @Override
@@ -113,8 +107,6 @@ public class StartSessionActivity extends AppCompatActivity {
 
         outState.putBoolean(Keys.STATE_USE_ALL_CONTACTS, useAllContacts);
         outState.putSerializable(Keys.STATE_SELECTED_CONTACT_IDS, selectedContactIds);
-        outState.putString(Keys.STATE_SELECTED_CONTACT_LABEL,
-                selectedContactsSummary.getText().toString());
     }
 
     public void onOpenMapPicker() {
@@ -122,7 +114,6 @@ public class StartSessionActivity extends AppCompatActivity {
         mapPickerLauncher.launch(intent);
     }
 
-    // Go back to main
     public void onGoBack(View view) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -131,9 +122,13 @@ public class StartSessionActivity extends AppCompatActivity {
     }
 
     public void onStartSession(View view) {
-
         if (!hasSelectedDestination) {
             Toast.makeText(this, "Please select a destination from the map", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!useAllContacts && selectedContactIds.isEmpty()) {
+            Toast.makeText(this, "Please select at least one trusted contact or choose Select all contacts", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -143,11 +138,8 @@ public class StartSessionActivity extends AppCompatActivity {
         intent.putExtra(Keys.EXTRA_DESTINATION_LNG, selectedDestinationLng);
         intent.putExtra(Keys.EXTRA_START_NEW_SESSION, true);
 
-        if (!useAllContacts && selectedContactIds.isEmpty()) {
-            Toast.makeText(this, "Please select at least one trusted contact or choose Select all contacts", Toast.LENGTH_SHORT).show();
-            return;
-        }
         intent.putExtra(Keys.EXTRA_USE_ALL_CONTACTS, useAllContacts);
+
         long[] selectedIdsArray = new long[selectedContactIds.size()];
         for (int i = 0; i < selectedContactIds.size(); i++) {
             selectedIdsArray[i] = selectedContactIds.get(i);
@@ -162,7 +154,6 @@ public class StartSessionActivity extends AppCompatActivity {
         useAllContacts = true;
         selectedContactIds.clear();
         updateSelectedContactsSummary();
-        Toast.makeText(this, "All trusted contacts selected", Toast.LENGTH_SHORT).show();
     }
 
     public void onSelectTrustedContacts(View view) {
@@ -186,27 +177,26 @@ public class StartSessionActivity extends AppCompatActivity {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Select trusted contacts");
+
+                // snapshot before showing dialog
+                ArrayList<Long> tempSelection = new ArrayList<>(selectedContactIds);
                 builder.setMultiChoiceItems(names, checkedItems, (dialog, which, isChecked) -> {
                     long contactId = contacts.get(which).getId();
                     if (isChecked) {
-                        if (!selectedContactIds.contains(contactId)) {
-                            selectedContactIds.add(contactId);
-                        }
+                        if (!tempSelection.contains(contactId)) tempSelection.add(contactId);
                     } else {
-                        selectedContactIds.remove(contactId);
+                        tempSelection.remove(contactId);
                     }
                 });
 
                 builder.setPositiveButton("Done", (dialog, which) -> {
+                    selectedContactIds.clear();
+                    selectedContactIds.addAll(tempSelection);
                     useAllContacts = false;
                     updateSelectedContactsSummary();
                 });
 
-                builder.setNeutralButton("Select all", (dialog, which) -> {
-                    useAllContacts = true;
-                    selectedContactIds.clear();
-                    updateSelectedContactsSummary();
-                });
+                builder.setNeutralButton("Select all", (dialog, which) -> onSelectAllContacts(null));
 
                 builder.setNegativeButton("Cancel", null);
                 builder.show();
@@ -214,16 +204,19 @@ public class StartSessionActivity extends AppCompatActivity {
         }).start();
     }
 
-
     private void updateSelectedContactsSummary() {
         if (selectedContactsSummary == null) return;
 
         if (useAllContacts) {
-            selectedContactsSummary.setText("All contacts will be notified");
+            selectedContactsSummary.setText(getString(R.string.summaryAllContacts));
         } else if (selectedContactIds.isEmpty()) {
-            selectedContactsSummary.setText("No contacts selected");
+            selectedContactsSummary.setText(getString(R.string.summaryNoContacts));
         } else {
-            selectedContactsSummary.setText(selectedContactIds.size() + " selected");
+            int selectedCount = selectedContactIds.size();
+            String text = selectedCount != 1 ?
+                    getString(R.string.summarySelectedContacts, selectedCount) :
+                    getString(R.string.summary1SelectedContact);
+            selectedContactsSummary.setText(text);
         }
     }
 }

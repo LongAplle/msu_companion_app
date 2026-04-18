@@ -21,12 +21,16 @@ public final class Keys {
     public static final String EXTRA_CONTACT_NAME = "contact_name";
     public static final String EXTRA_CONTACT_PHONE = "contact_phone";
     public static final String EXTRA_SESSION_ID = "session_id";
+    public static final String EXTRA_SELECTED_CONTACT_IDS = "selected_contact_ids";
+    public static final String EXTRA_USE_ALL_CONTACTS = "use_all_contacts";
 
     // Instance State Keys
     public static final String STATE_HAS_SELECTION = "state_has_selection";
     public static final String STATE_DEST_NAME = "state_dest_name";
     public static final String STATE_DEST_LAT = "state_dest_lat";
     public static final String STATE_DEST_LNG = "state_dest_lng";
+    public static final String STATE_SELECTED_CONTACT_IDS = "state_selected_contact_ids";
+    public static final String STATE_USE_ALL_CONTACTS = "state_use_all_contacts";
 
     // Firestore collections
     public static final String COLLECTION_USERS = "users";
@@ -53,12 +57,5 @@ public final class Keys {
     public static final String FIELD_SESSION_START_TIME = "startTime";
     public static final String FIELD_SESSION_END_TIME = "endTime";
     public static final String FIELD_SESSION_STATUS = "status";
-
-    //select contacts to notify
-    public static final String EXTRA_SELECTED_CONTACT_IDS = "selected_contact_ids";
-    public static final String EXTRA_USE_ALL_CONTACTS = "use_all_contacts";
-    public static final String STATE_SELECTED_CONTACT_IDS = "state_selected_contact_ids";
-    public static final String STATE_USE_ALL_CONTACTS = "state_use_all_contacts";
-    public static final String STATE_SELECTED_CONTACT_LABEL = "state_selected_contact_label";
 
 }

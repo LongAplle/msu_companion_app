@@ -55,6 +55,10 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     // Destination selected by the user
     private Destination destination;
 
+    // Contact selection
+    private boolean useAllContacts = true;
+    private long[] selectedContactIds = new long[0];
+
     // Google Maps state
     private GoogleMap googleMap;
     private Marker currentLocationMarker;
@@ -68,9 +72,6 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     private LatLng lastRouteOrigin = null;
     private static final long ROUTE_REFRESH_INTERVAL_MS = 15000L;   // 15 sec
     private static final float ROUTE_REFRESH_MIN_MOVE_METERS = 25f; // refetch after meaningful movement
-
-    private boolean useAllContacts = true;
-    private long[] selectedContactIds = new long[0];
 
     // Service binding
     private WalkSessionService walkSessionService;
@@ -104,13 +105,14 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         }
 
         Intent sourceIntent = getIntent();
+
         useAllContacts = sourceIntent.getBooleanExtra(Keys.EXTRA_USE_ALL_CONTACTS, true);
         selectedContactIds = sourceIntent.getLongArrayExtra(Keys.EXTRA_SELECTED_CONTACT_IDS);
         if (selectedContactIds == null) {
             selectedContactIds = new long[0];
         }
 
-        startNewSessionFlag = getIntent().getBooleanExtra(Keys.EXTRA_START_NEW_SESSION, false);
+        startNewSessionFlag = sourceIntent.getBooleanExtra(Keys.EXTRA_START_NEW_SESSION, false);
         if (!startNewSessionFlag) {
             if (!ActiveSessionRepository.hasActiveSession()) {
                 // The session has ended, so finish this activity
@@ -119,9 +121,9 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
             }
         }
 
-        String destinationName = getIntent().getStringExtra(Keys.EXTRA_DESTINATION_NAME);
-        double destinationLat = getIntent().getDoubleExtra(Keys.EXTRA_DESTINATION_LAT, 0.0);
-        double destinationLng = getIntent().getDoubleExtra(Keys.EXTRA_DESTINATION_LNG, 0.0);
+        String destinationName = sourceIntent.getStringExtra(Keys.EXTRA_DESTINATION_NAME);
+        double destinationLat = sourceIntent.getDoubleExtra(Keys.EXTRA_DESTINATION_LAT, 0.0);
+        double destinationLng = sourceIntent.getDoubleExtra(Keys.EXTRA_DESTINATION_LNG, 0.0);
 
         if (destinationName == null) {
             destinationName = "Unknown";

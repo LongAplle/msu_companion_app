@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">MSU Companion</string>
+    <string name="spartan_head_logo">Spartan head logo</string>
+    <string name="msu_companion_logo">MSU Companion logo</string>
+
     <string name="greetingText">Hello, %1$s!</string>
     <string name="contactViewText">View Trusted Contacts</string>
     <string name="sessionViewText">View Session History</string>
@@ -42,20 +45,21 @@
     <string name="sessionTitle">Start a new session</string>
     <string name="finalDest">Final Destination</string>
     <string name="destinationHint">e.g., Shaw Hall, 1855 Place</string>
+    <string name="trustedContacts">Trusted contacts</string>
+    <string name="selectContactsText">Select specific contacts</string>
+    <string name="selectAllContactsText">Select all contacts</string>
+    <string name="summaryAllContacts">All contacts will be notified</string>
+    <string name="summary1SelectedContact">1 contact selected</string>
+    <string name="summarySelectedContacts">%1$d contacts selected</string>
+    <string name="summaryNoContacts">No contacts selected</string>
     <string name="GoBack">Go back</string>
-    <string name="spartan_head_logo">Spartan head logo</string>
-    <string name="sessionStatus">Status:\n%1$s</string>
-    <string name="msu_companion_logo">MSU Companion logo</string>
 
     <string name="destinationNamePlaceholder">Destination Name</string>
     <string name="timePlaceholder">Time</string>
+    <string name="sessionStatus">Status:\n%1$s</string>
 
     <string name="timeRangeText">%1$s - %2$s</string>
     <string name="fromText">From:\n%1$s</string>
     <string name="toText">To:\n%1$s</string>
-    <string name="trusted_contacts">Trusted contacts</string>
-    <string name="select_specific_contacts">Select specific contacts</string>
-    <string name="select_all_contacts">Select all contacts</string>
-    <string name="all_contacts_will_be_notified">(All contacts will be notified)</string>
 
 </resources>
