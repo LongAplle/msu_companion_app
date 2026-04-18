@@ -51,6 +51,9 @@
     <string name="summary1SelectedContact">1 contact selected</string>
     <string name="summarySelectedContacts">%1$d contacts selected</string>
     <string name="summaryNoContact">No contact selected</string>
+    <string name="notifyIntervalLabel">Notify contacts every</string>
+    <string name="minutesUnit">minutes</string>
+
     <string name="GoBack">Go back</string>
 
     <string name="doneText">Done</string>

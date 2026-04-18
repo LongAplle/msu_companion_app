@@ -23,6 +23,7 @@ public final class Keys {
     public static final String EXTRA_SESSION_ID = "session_id";
     public static final String EXTRA_SELECTED_CONTACT_IDS = "selected_contact_ids";
     public static final String EXTRA_USE_ALL_CONTACTS = "use_all_contacts";
+    public static final String EXTRA_NOTIFY_INTERVAL_MINUTES = "notify_interval_minutes";
 
     // Instance State Keys
     public static final String STATE_HAS_SELECTION = "state_has_selection";

@@ -33,6 +33,8 @@ public class StartSessionActivity extends AppCompatActivity {
     private final ArrayList<Long> selectedContactIds = new ArrayList<>();
     private boolean useAllContacts = true;
 
+    private EditText notifyIntervalInput;
+
     private final ActivityResultLauncher<Intent> mapPickerLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
@@ -63,9 +65,13 @@ public class StartSessionActivity extends AppCompatActivity {
             return;
         }
 
-        selectedContactsSummary = findViewById(R.id.selectedContactsSummary);
         destinationEditText = findViewById(R.id.destinationInput);
         destinationEditText.setOnClickListener( v -> onOpenMapPicker());
+
+        selectedContactsSummary = findViewById(R.id.selectedContactsSummary);
+
+        notifyIntervalInput = findViewById(R.id.notifyIntervalInput);
+        notifyIntervalInput.setText(String.valueOf(WalkSessionService.NOTIFY_INTERVAL_MINUTES_DEFAULT));
 
         // Restore data if we are recovering from a rotation
         if (savedInstanceState != null) {
@@ -193,6 +199,18 @@ public class StartSessionActivity extends AppCompatActivity {
             return;
         }
 
+        int notifyIntervalMinutes;
+        try {
+            notifyIntervalMinutes = Integer.parseInt(notifyIntervalInput.getText().toString());
+            if (notifyIntervalMinutes < 1) {
+                Toast.makeText(this, "Notify interval must be at least 1 minute", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Please enter a valid notify interval", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent intent = new Intent(this, WalkSessionActivity.class);
         intent.putExtra(Keys.EXTRA_DESTINATION_NAME, selectedDestinationName);
         intent.putExtra(Keys.EXTRA_DESTINATION_LAT, selectedDestinationLat);
@@ -206,6 +224,8 @@ public class StartSessionActivity extends AppCompatActivity {
             selectedIdsArray[i] = selectedContactIds.get(i);
         }
         intent.putExtra(Keys.EXTRA_SELECTED_CONTACT_IDS, selectedIdsArray);
+
+        intent.putExtra(Keys.EXTRA_NOTIFY_INTERVAL_MINUTES, notifyIntervalMinutes);
 
         startActivity(intent);
         finish();

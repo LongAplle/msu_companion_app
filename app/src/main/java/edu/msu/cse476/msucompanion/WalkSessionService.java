@@ -77,8 +77,9 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
     // Distance threshold used to determine arrival (in meters)
     private static final float ARRIVAL_THRESHOLD_METERS = 50.0f;
 
-    // SMS / Firestore ping interval (in milliseconds)
-    private static final long LOCATION_PING_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
+    // SMS / Firestore default ping interval (in minutes)
+    public static final int NOTIFY_INTERVAL_MINUTES_DEFAULT = 5;
+    private long notifyIntervalMs = (long) NOTIFY_INTERVAL_MINUTES_DEFAULT * 60 * 1000;
 
     // Interface for activities to receive updates
     public interface SessionListener {
@@ -133,6 +134,8 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
                     if (selectedContactIds == null) {
                         selectedContactIds = new long[0];
                     }
+
+                    notifyIntervalMs = (long) intent.getIntExtra(Keys.EXTRA_NOTIFY_INTERVAL_MINUTES, NOTIFY_INTERVAL_MINUTES_DEFAULT) * 60 * 1000;
 
                     // Get current user ID
                     SharedPreferences prefs = getSharedPreferences(Keys.PREF_USER, Context.MODE_PRIVATE);
@@ -516,7 +519,7 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
                     addLocationPing(lat, lng);
                 }
                 if (walkSessionActive) {
-                    handler.postDelayed(this, LOCATION_PING_INTERVAL_MS); // 5 minutes
+                    handler.postDelayed(this, notifyIntervalMs); // 5 minutes
                 }
             }
         };
@@ -527,6 +530,8 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+
+            Log.i("SMS", "Message sent to " + phoneNumber);
         }
         catch (Exception e) {
             handler.post(() ->

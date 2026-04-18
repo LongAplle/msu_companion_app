@@ -59,6 +59,8 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
     private boolean useAllContacts = true;
     private long[] selectedContactIds = new long[0];
 
+    private int notifyIntervalMinutes = WalkSessionService.NOTIFY_INTERVAL_MINUTES_DEFAULT;
+
     // Google Maps state
     private GoogleMap googleMap;
     private Marker currentLocationMarker;
@@ -106,12 +108,6 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
 
         Intent sourceIntent = getIntent();
 
-        useAllContacts = sourceIntent.getBooleanExtra(Keys.EXTRA_USE_ALL_CONTACTS, true);
-        selectedContactIds = sourceIntent.getLongArrayExtra(Keys.EXTRA_SELECTED_CONTACT_IDS);
-        if (selectedContactIds == null) {
-            selectedContactIds = new long[0];
-        }
-
         startNewSessionFlag = sourceIntent.getBooleanExtra(Keys.EXTRA_START_NEW_SESSION, false);
         if (!startNewSessionFlag) {
             if (!ActiveSessionRepository.hasActiveSession()) {
@@ -130,6 +126,14 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
         }
 
         destination = new Destination(destinationName, destinationLat, destinationLng);
+
+        useAllContacts = sourceIntent.getBooleanExtra(Keys.EXTRA_USE_ALL_CONTACTS, true);
+        selectedContactIds = sourceIntent.getLongArrayExtra(Keys.EXTRA_SELECTED_CONTACT_IDS);
+        if (selectedContactIds == null) {
+            selectedContactIds = new long[0];
+        }
+
+        notifyIntervalMinutes = getIntent().getIntExtra(Keys.EXTRA_NOTIFY_INTERVAL_MINUTES, WalkSessionService.NOTIFY_INTERVAL_MINUTES_DEFAULT);
 
         // Initialize UI components
         TextView tvDestination = findViewById(R.id.tvDestination);
@@ -348,6 +352,8 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
 
         intent.putExtra(Keys.EXTRA_USE_ALL_CONTACTS, useAllContacts);
         intent.putExtra(Keys.EXTRA_SELECTED_CONTACT_IDS, selectedContactIds);
+
+        intent.putExtra(Keys.EXTRA_NOTIFY_INTERVAL_MINUTES, notifyIntervalMinutes);
 
         startService(intent);  // will update the button text when it actually starts
     }
