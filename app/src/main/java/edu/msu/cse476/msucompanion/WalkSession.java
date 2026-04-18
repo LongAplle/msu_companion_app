@@ -23,12 +23,9 @@ public class WalkSession {
 
     // Getters and Setters
     public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
 
-    public String getRemoteId() { return remoteId; }
     public void setRemoteId(String remoteId) { this.remoteId = remoteId; }
 
-    public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
 
     public Date getStartTime() { return startTime; }
