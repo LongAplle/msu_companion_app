@@ -1,6 +1,5 @@
 package edu.msu.cse476.msucompanion;
 
-import android.graphics.Paint;
 import android.os.Bundle;
 
 import android.content.Context;
@@ -9,7 +8,6 @@ import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -24,11 +22,6 @@ public class SignupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
-        TextView goBack = findViewById(R.id.goBackFromSignup);
-        if (goBack != null) {
-            goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        }
     }
 
     public void onGoBackToLogin(View view) {

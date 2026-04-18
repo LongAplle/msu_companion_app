@@ -45,16 +45,18 @@
     <string name="sessionTitle">Start a new session</string>
     <string name="finalDest">Final Destination</string>
     <string name="destinationHint">e.g., Shaw Hall, 1855 Place</string>
-    <string name="trustedContacts">Trusted contacts</string>
     <string name="selectContactsText">Select contacts to notify</string>
-    <string name="summaryAllContacts">All contacts will be notified</string>
-    <string name="summary1SelectedContact">1 contact selected</string>
-    <string name="summarySelectedContacts">%1$d contacts selected</string>
+    <string name="summaryAllContacts">All contacts will be notified\n<i>(including any added later)</i></string>
     <string name="summaryNoContact">No contact selected</string>
     <string name="notifyIntervalLabel">Notify contacts every</string>
     <string name="minutesUnit">minutes</string>
 
-    <string name="GoBack">Go back</string>
+    <plurals name="summarySelectedContacts">
+        <item quantity="one">%d contact selected</item>
+        <item quantity="other">%d contacts selected</item>
+    </plurals>
+
+    <string name="GoBack"><u>Go back</u></string>
 
     <string name="doneText">Done</string>
     <string name="cancelText">Cancel</string>

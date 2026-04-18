@@ -1,7 +1,6 @@
 package edu.msu.cse476.msucompanion;
 
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -96,9 +95,6 @@ public class StartSessionActivity extends AppCompatActivity {
                 }
             }
         }
-
-        TextView goBack = findViewById(R.id.goBackFromSession);
-        goBack.setPaintFlags(goBack.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
     }
 
     @Override
@@ -194,11 +190,6 @@ public class StartSessionActivity extends AppCompatActivity {
             return;
         }
 
-        if (!useAllContacts && selectedContactIds.isEmpty()) {
-            Toast.makeText(this, "Please select at least one trusted contact or choose Select all contacts", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         int notifyIntervalMinutes;
         try {
             notifyIntervalMinutes = Integer.parseInt(notifyIntervalInput.getText().toString());
@@ -208,6 +199,11 @@ public class StartSessionActivity extends AppCompatActivity {
             }
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Please enter a valid notify interval", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!useAllContacts && selectedContactIds.isEmpty()) {
+            Toast.makeText(this, "Please select at least one trusted contact", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -240,10 +236,7 @@ public class StartSessionActivity extends AppCompatActivity {
             selectedContactsSummary.setText(getString(R.string.summaryNoContact));
         } else {
             int selectedCount = selectedContactIds.size();
-            String text = selectedCount != 1 ?
-                    getString(R.string.summarySelectedContacts, selectedCount) :
-                    getString(R.string.summary1SelectedContact);
-            selectedContactsSummary.setText(text);
+            selectedContactsSummary.setText(getResources().getQuantityString(R.plurals.summarySelectedContacts, selectedCount, selectedCount));
         }
     }
 }
