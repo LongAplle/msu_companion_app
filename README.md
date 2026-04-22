@@ -1,0 +1,13 @@
+<img width="960" height="540" alt="MSUCompanion" src="https://github.com/user-attachments/assets/cc4125b2-16d8-4628-842c-dcccba37a6d4" />
+<img width="960" height="540" alt="Problem" src="https://github.com/user-attachments/assets/47ca901c-5b65-48cc-9b0c-4dae402b618a" />
+<img width="960" height="540" alt="Solution" src="https://github.com/user-attachments/assets/298c041d-6a0b-4a3c-bec5-8d2a867b97f9" />
+<img width="960" height="540" alt="Login-SignUp" src="https://github.com/user-attachments/assets/7297bbe3-88bc-4f6d-ba82-930bb8a6fb71" />
+<img width="960" height="540" alt="Home" src="https://github.com/user-attachments/assets/1e999c9d-7e8b-41c0-b734-4bc9cd5a8522" />
+<img width="960" height="540" alt="Contacts" src="https://github.com/user-attachments/assets/f110318f-70ff-487e-80d6-5cc6490b3162" />
+<img width="960" height="540" alt="History" src="https://github.com/user-attachments/assets/9d10ff0b-d32f-4d63-a9ab-5c564d73f330" />
+<img width="960" height="540" alt="Create" src="https://github.com/user-attachments/assets/90b0bd3a-ab27-4002-aa67-d68780a89849" />
+<img width="960" height="540" alt="Start" src="https://github.com/user-attachments/assets/4b442a15-9036-4de6-a384-a77e5ee2f4e7" />
+<img width="960" height="540" alt="Session" src="https://github.com/user-attachments/assets/1681402f-76d3-42cb-b1b5-830d19c2bbca" />
+<img width="960" height="540" alt="Database" src="https://github.com/user-attachments/assets/069137a6-59c0-4421-b1bc-c493db6e4c3b" />
+<img width="960" height="540" alt="Future" src="https://github.com/user-attachments/assets/00c2b8ec-aaf0-4117-a84e-6cc9a73c95b0" />
+<img width="960" height="540" alt="Conclusion" src="https://github.com/user-attachments/assets/ab0974fd-82f6-4f52-813e-fbf0ec50a81a" />
