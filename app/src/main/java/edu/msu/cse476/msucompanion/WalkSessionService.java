@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.SmsManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -530,8 +529,6 @@ public class WalkSessionService extends Service implements LocationHelper.Locati
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-
-            Log.i("SMS", "Message sent to " + phoneNumber);
         }
         catch (Exception e) {
             handler.post(() ->
