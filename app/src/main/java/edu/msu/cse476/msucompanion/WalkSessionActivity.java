@@ -427,8 +427,28 @@ public class WalkSessionActivity extends AppCompatActivity implements OnMapReady
                     .include(destinationLatLng)
                     .build();
 
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 120));
-            initialCameraFramed = true;
+            View mapContainer = findViewById(R.id.mapContainer);
+            int width = mapContainer.getWidth();
+            int height = mapContainer.getHeight();
+
+            // If the map hasn't finished layout yet, width/height will be 0
+            if (width <= 0 || height <= 0) {
+                // Fallback: Use screen dimensions if layout hasn't happened
+                width = getResources().getDisplayMetrics().widthPixels;
+                height = getResources().getDisplayMetrics().heightPixels;
+            }
+
+            int padding = (int) (width * 0.20); // 20% padding for a nice look
+
+            try {
+                // This version works even if the map layout isn't "finished"
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                initialCameraFramed = true;
+            } catch (Exception e) {
+                // Simple zoom
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
+                initialCameraFramed = true;
+            }
         } else {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f));
         }
